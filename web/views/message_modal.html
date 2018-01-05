@@ -1,0 +1,74 @@
+<div class="modal modal-fixed-footer" id="message-modal">
+    <div class="modal-content">
+        <div class="row">
+            <form id ="validation-form">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="edit-title" type="text" autocomplete="nope" class="validate" required/>
+                        <input type="hidden" id="edit-message-id" />
+                        <label for="edit-title" id="title-label"></label>
+                    </div>
+
+                    <div class="input-field col s12" style="display: flex">
+                        <input id="edit-username" type="text" autocomplete="nope"/>
+                        <label for="edit-username" id="username-label"></label>
+                        <i class="material-icons right" onclick="CredentialModal.copyUsernameToClipboard()">content_copy</i>
+                    </div>
+
+                    <div class="input-field col s12 valign-wrapper" style="display: flex">
+                        <input id="edit-password" type="password" autocomplete="new-password" class="validate" required />
+                        <label for="edit-password" id="password-label"></label>
+                        <i class="material-icons right" id="edit-generate-password" onclick="$('#edit-password').val(PasswordUtil.generate(16))">refresh</i>
+
+                        <i class="material-icons right" id="edit-look" onmousedown="$('#edit-password').clone().attr('type', 'text').insertAfter('#edit-password').prev().remove();" onmouseup="$('#edit-password').clone().attr('type', 'password').insertAfter('#edit-password').prev().remove();">remove_red_eye</i>
+                        <i class="material-icons right" onclick="CredentialModal.copyPasswordToClipboard()">content_copy</i>
+                    </div>         
+                    <div class="input-field col s12" style="height: 5em !important">
+                        <textarea id="edit-description" style="max-height: 3.5em" class="materialize-textarea" autocomplete="nope"></textarea>
+                        <label for="edit-description" id="description-label"></label>
+                    </div>
+
+                    <div class="input-field col s12" style="display: flex">
+                        <input id="edit-url" type="url" autocomplete="nope" class="validate">
+                        <label for="edit-url" id="url-label"></label>
+                        <i class="material-icons right" onclick="CredentialModal.openUrl()">open_in_new</i>
+                        <input type="submit" id="validation" style="display: none" />
+                    </div>
+                </div>
+            </form>
+
+            <div class="row" style="margin-bottom: 0px;">
+                <div class="input-field col s12" style="height: 5em !important">
+                    <textarea id="edit-message" style="max-height: 3.5em !important" class="materialize-textarea" disabled autocomplete="nope"></textarea>
+                    <label for="edit-message" id="message-label"></label>
+                </div>
+
+                <div class="input-field col s12" style="height: 3.5em !important;" >
+                    <input id="edit-tree-search" type="text" autocomplete="nope" />
+                    <label for="edit-tree-search" id="tree-search-label"></label>
+                </div>
+
+                <div class="col s12 enso-main-color-text" id="tree-view" style=" margin-top: 1em;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="row" style="margin: 0">
+            <div class="col s12">
+                <a class="btn waves-effect waves-light grey accent-4 tooltipped" id="message-modal-cancel-button" data-position="top" data-delay="50" name="action" onclick=" $('#message-modal').modal('close');"><i class="material-icons">clear</i>
+                </a>
+                <a class="btn waves-effect waves-light enso-main-color accent-4 tooltipped" id="message-modal-save-button" data-position="top" data-delay="50" name="action" onClick="MessageModal.createCredential()"><i class="material-icons">save</i>
+                </a>
+                <a class="btn waves-effect waves-light red accent-4 left tooltipped" id="message-modal-remove-button" data-position="top" data-delay="50" name="action" onClick="ConfirmationModal.show(LocalizationManager.getStringFromView('message_modal', 'remove-confirmation'), MessageModal.removeMessage, undefined, 'message-modal')"><i class="material-icons">delete</i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    LocalizationManager.applyLocaleSettingsToGivenView('message_modal');
+</script>
+
+<link href="./css/modal_Stuff.css" rel="stylesheet" type="text/css"/>

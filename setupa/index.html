@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Enso PASSWD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../web/css/materialize.css" rel="stylesheet" type="text/css" />
+    <link href="../web/css/material-icons.css" rel="stylesheet" type="text/css" />
+
+    <script src="../web/js/external/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script src="../web/js/external/materialize.js" type="text/javascript"></script>
+    <script src="index.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="custom.css">
+
+</head>
+
+
+<body>
+    <div class="navbar-fixed" id='header'>
+        <nav class="nav-border enso-main-color">
+            <div class="nav-wrapper">
+                <div class="row">
+                    <div class="col s12">
+                        <a class="brand-logo" href="">ENSO PASSWD</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div id="loader" class="center-align" style="width: 100%; margin-top: 2em;">
+    <div class="preloader-wrapper big active">
+        <div class="spinner-layer spinner-blue">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div><div class="gap-patch">
+            <div class="circle"></div>
+          </div><div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+  
+        <div class="spinner-layer spinner-red">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div><div class="gap-patch">
+            <div class="circle"></div>
+          </div><div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+  
+        <div class="spinner-layer spinner-yellow">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div><div class="gap-patch">
+            <div class="circle"></div>
+          </div><div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+  
+        <div class="spinner-layer spinner-green">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div><div class="gap-patch">
+            <div class="circle"></div>
+          </div><div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    <div class="container" id="main-content">
+        <div class="row">
+            <h4>Tell us a bit about your database:</h4>
+            <div class="divider" style="margin-bottom: 1em"></div>
+            <div class="input-field col s12">
+                <input placeholder="localhost" id="edit-dbhost" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-dbhost" id="dbhost-label">Host</label>
+            </div>
+
+            <div class="input-field col s12">
+                <input placeholder="3306" id="edit-dbport" type="number" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-dbport" id="dbport-label">Port</label>
+            </div>
+
+            <div class="input-field col s12">
+                <input placeholder="passwduser" id="edit-dbuser" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-dbuser" id="dbuser-label">User</label>
+            </div>
+            <div class="input-field col s12">
+                <input id="edit-dbpass" type="password" autocomplete="new-password" class="validate invalid" required>
+                <label for="edit-password" id="password-label">Password</label>
+            </div>
+            <div class="input-field col s6">
+                <input placeholder="passwd" id="edit-dbname" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-dbname" id="dbname-label">Database Name</label>
+            </div>
+            <div class="col s6" style="margin-top: 2em">
+                <a class="waves-effect waves-light btn right" onclick="testDB()" style="margin-right: 1em">
+                    <i class="material-icons left">refresh</i>Test DB settings</a>
+            </div>
+            <h4 style="clear:both">Set up your first admin user:</h4>
+            <div class="divider" style="margin-bottom: 1em"></div>
+            <div class="input-field col s12">
+                <input id="edit-username" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-username" id="username-label">Username</label>
+            </div>
+
+            <div class="input-field col s12">
+                <input id="edit-email" type="email" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-email" id="email-label">Email</label>
+            </div>
+            <div class="input-field col s12">
+                <input id="edit-password" type="password" autocomplete="new-password" class="validate invalid" required>
+                <label for="edit-password" id="password-label">Password</label>
+                <input type="submit" id="validation" style="display: none" />
+            </div>
+            <h4>Set up your LDAP settings (leave all blank to ignore this)</h4>
+            <div class="divider" style="margin-bottom: 1em"></div>
+            <div class="input-field col s12">
+                <input placeholder="localhost" id="edit-ldaphost" type="text" autocomplete="nope" class="validate">
+                <label for="edit-host" id="host-label">Host</label>
+            </div>
+
+            <div class="input-field col s12">
+                <input placeholder="389" id="edit-ldapport" type="number" autocomplete="nope" class="validate">
+                <label for="edit-ldapport" id="email-port">Port</label>
+            </div>
+
+            <div class="input-field col s12">
+                <input placeholder="10" id="edit-ldaptimeout" type="number" autocomplete="nope" class="validate">
+                <label for="edit-ldaptimeout" id="timeout-label">Timeout in Seconds</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="dc=localhost,dc=localdomain" id="edit-ldapmaindn" type="text" autocomplete="nope" class="validate">
+                <label for="edit-ldapmaindn" id="password-label">Main DN</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="(|(uid=%s)(mail=%s))" id="edit-ldapquery" type="text" autocomplete="nope" class="validate">
+                <label for="edit-ldapquery" id="query-label">Query String</label>
+            </div>
+            <div class="input-field col s4">
+                <input id="edit-ldaptestuser" type="text" autocomplete="nope" class="validate">
+                <label for="edit-ldaptestuser" id="testuser-label">User to test</label>
+            </div>
+            <div class="input-field col s4">
+                <input id="edit-ldaptestpass" type="password" autocomplete="new-password" class="validate">
+                <label for="edit-ldaptestpass" id="testpass-label">Password to test</label>
+            </div>
+            <div class="col s4" style="margin-top: 2em">
+                <a class="waves-effect waves-light btn right" onclick="testLDAP()" style="margin-right: 1em">
+                    <i class="material-icons left">refresh</i>Test LDAP settings</a>
+            </div>
+            <h4 style="clear:both">Email settings</h4>
+            <div class="divider" style="margin-bottom: 1em"></div>
+            <div class="input-field col s12">
+                <input placeholder="smtp.test.com" id="edit-emailhost" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-emailhost" id="emailhost-label">Host</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="25" id="edit-emailport" type="number" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-emailport" id="emailport-label">Port</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="no-reply@test.com" id="edit-emailfrom" type="email" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-emailfrom" id="emailfrom-label">Send email from</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="actual.user.that@will.send.email.com" id="edit-emailuser" type="text" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-emailuser" id="emailuser-label">User to authenticate</label>
+            </div>
+            <div class="input-field col s12">
+                <input id="edit-emailpass" type="password" autocomplete="nope" class="validate invalid" required>
+                <label for="edit-emailuser" id="emailpassword-label">Password to authenticate</label>
+            </div>
+            <div class="input-field col s6">
+                <input id="edit-emailto" type="email" autocomplete="nope" class="validate">
+                <label for="edit-emailto" id="emailto-label">Destination for test email</label>
+            </div>
+            <div class="col s6" style="margin-top: 2em">
+                <a class="waves-effect waves-light btn right" onclick="testEmail()" style="margin-right: 1em">
+                    <i class="material-icons left">refresh</i>Test email settings</a>
+            </div>
+            <h4 style="clear:both">Encryption key location</h4>
+            <div class="divider" style="margin-bottom: 1em"></div>
+            <div class="input-field col s6">
+                <input id="edit-keylocation" placeholder="~/passwd.d/" type="text" autocomplete="nope" class="validate" required>
+                <label for="edit-keylocation" id="keylocation-label">Encryption key location</label>
+            </div>
+            <div class="col s6">
+                <a class="waves-effect waves-light btn right" onclick="callSetupScript()">
+                    <i class="material-icons left">done</i>Configure</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-modal" class="modal">
+        <div class="modal-content">
+
+        </div>
+        <div class="modal-footer">
+
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+{
+    "messages":
+            {
+                "create-message-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Partilhar"
+                                    }
+                        },
+                        "inbox-tab-text": 
+                        {
+                            "text": "Inbox",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "outbox-tab-text": 
+                        {
+                            "text": "Enviadas",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "message-label": 
+                        {
+                            "text": "Mensagem",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "tree-search-label": 
+                        {
+                            "text": "Procurar pasta...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        }
+            }
+}

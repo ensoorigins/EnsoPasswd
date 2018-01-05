@@ -1,0 +1,53 @@
+{
+        "folders": {
+                "breadcrumb-text": {
+                        "text": "Currently in:",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "create-new-folder-button": {
+                        "text": "",
+                        "applyTo": "id",
+                        "attributes": {
+                                "data-tooltip": "Create new folder"
+                        }
+                },
+                "create-new-credential-button": {
+                        "text": "",
+                        "applyTo": "id",
+                        "attributes": {
+                                "data-tooltip": "Create new credential"
+                        }
+                },
+                "created-by-pre-text": {
+                        "text": "Created by: ",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "folder-label": {
+                        "text": "folder(s)",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "credential-label": {
+                        "text": "credential(s)",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "copy-user-label": {
+                        "text": "Copy Username",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "copy-password-label": {
+                        "text": "Copy Password",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "open-url-label": {
+                        "text": "Open Url",
+                        "applyTo": "class",
+                        "attributes": {}
+                }
+        }
+}

@@ -1,0 +1,50 @@
+{
+    "messages":
+            {
+                "create-message-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Share"
+                                    }
+                        },
+                        "inbox-tab-text": 
+                        {
+                            "text": "Inbox",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "outbox-tab-text": 
+                        {
+                            "text": "Outbox",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "message-label": 
+                        {
+                            "text": "Message",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "tree-search-label": 
+                        {
+                            "text": "Search folder...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        }
+            }
+}

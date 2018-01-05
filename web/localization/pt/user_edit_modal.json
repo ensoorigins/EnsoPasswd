@@ -1,0 +1,107 @@
+{
+    "user_edit_modal":
+            {
+                "username-label": 
+                        {
+                            "text": "Nome de Utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "password-label": 
+                        {
+                            "text": "Senha",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "email-label": 
+                        {
+                            "text": "Email",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "no-label":
+                        {
+                            "text": "Desactivado",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "yes-label":
+                        {
+                            "text": "Activado",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancelar"
+                                    }
+                        },
+                "user-modal-create-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Criar"
+                                    }
+                        },
+                "user-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Guardar"
+                                    }
+                        },
+                "user-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remover"
+                                    }
+                        },
+                "enums":
+                        {
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Pressione pra entrar no modo de visualização ",
+                                        "locked": "Pressione para entrar no modo de edição"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "Email inválido",
+                                        "2": "Valor LDAP Inválido",
+                                        "3": "Valor sysadmin inválido",
+                                        "4": "Nome de utilizador é obrigadtório",
+                                        "5": "Um utilziador com esse nome já existe",
+                                        "6": "Senha é obrigatória"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Tem a certeza de que quer remover este utilizador?"
+                        }
+            }
+    }

@@ -1,0 +1,72 @@
+html { 
+    background: url(../img/bgr.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+
+#login-icon-container{
+    background: #143442;
+    width: 15em;
+    height: 10em;
+    border-radius:  0px 0px 10px 10px;
+    left: calc(100vw * 0.5 - 7.5em);
+    position: absolute;
+    text-align: center;
+}
+
+#login-icon-container > img {
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin: auto;
+    width: 10em;
+    margin-top: calc(100% * 0.15)
+}
+
+#logo{
+    position: absolute;
+    left:0;
+    right: 0;
+    top: 13.5em;
+    margin: auto;
+    width: 25em;
+}
+
+#login-inputs{
+    position:absolute;
+    top: 20em;
+    width: 25em;
+    left:0;
+    right: 0;
+    margin: auto;
+}
+
+#login-inputs > .row > .col > input{
+    border-radius: 5px;
+    padding: 0em 0em;
+    width: 23em;
+    height: 5em;
+    border: 0px;
+    box-shadow: none;
+}
+
+#login-inputs > .row > .col{
+    background: white;
+    border-radius: 5px;
+    height: 5em;
+}
+
+#login-btn{
+    background: #114962;
+    position:absolute;
+    top: 35em;
+    width: 20em;
+    left:0;
+    right: 0;
+    margin: auto;
+    border-radius: 5px;
+    letter-spacing: 5px;
+    font-weight: bold;
+}

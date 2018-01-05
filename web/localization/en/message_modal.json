@@ -1,0 +1,105 @@
+{
+    "message_modal":
+            {
+                "title-label": 
+                        {
+                            "text": "Title",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "username-label": 
+                        {
+                            "text": "Username",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "password-label": 
+                        {
+                            "text": "Password",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "description-label": 
+                        {
+                            "text": "Description",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "url-label": 
+                        {
+                            "text": "Url",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "message-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancel"
+                                    }
+                        },
+                "message-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Save"
+                                    }
+                        },
+                "message-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remove"
+                                    }
+                        },
+                "saveto-text": 
+                        {
+                            "text": "Save to...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                "enums":
+                        {
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Press to go into view mode",
+                                        "locked": "Press to go into edit mode"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "Invalid URL",
+                                        "2": "Invalid title",
+                                        "3": "There is already a credential with that title in this folder",
+                                        "4": "Password is a mandatory field"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Are yo sure you wish to delete this message?"
+                        }
+            }
+}

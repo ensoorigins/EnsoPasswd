@@ -1,0 +1,11 @@
+{
+    "external_link":
+            {
+                "strings": 
+                        {
+                            "external-not-found": "This external key was not found.",
+                            "external-found" : "Hello, a user from this platform has shared a confidencial link with you, this link contains a credencial.\n\nPlease be aware that this key should not be published anywhere unless you have the explicit consent of the user who gave you this link.",
+                            "link-copy": "Link copied to clipboard."
+                        }
+            }
+}

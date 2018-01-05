@@ -1,0 +1,81 @@
+{
+    "share_modal":
+            {
+                "share-with-label": 
+                        {
+                            "text": "Share with...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "message-label": 
+                        {
+                            "text": "Message",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "label-6-hours": 
+                        {
+                            "text": "6 hours",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "label-12-hours": 
+                        {
+                            "text": "12 hours",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "label-24-hours": 
+                        {
+                            "text": "24 hours",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "label-7-days": 
+                        {
+                            "text": "7 days",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                        "external-toggle-label": 
+                        {
+                            "text": "External user",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "enums": 
+                        {
+                            "validationErrors":
+                                    {
+                                        "1": "Destination user does not exist",
+                                        "2": "The credential you are trying to share does not exist",
+                                        "3": "Invalid time duration"
+                                    }
+                        },
+                        "strings": 
+                {
+                    "external-share-success" : "You share link is:"
+                }
+            }
+}

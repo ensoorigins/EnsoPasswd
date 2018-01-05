@@ -1,0 +1,27 @@
+.modal-content .input-field input{
+    border-radius: 0px !important;
+}
+
+.modal-content .input-field input:disabled, .modal-content .input-field textarea:disabled{
+    color: black;
+}
+
+#user-list-body tr td label{
+    z-index: 0;
+}
+
+#folder-modal {
+    overflow: visible;
+}
+
+.modal-content .row .col i {
+    cursor:pointer;
+}
+
+.modal-content .input-field{
+    margin-bottom: 1em;
+}
+
+.input-field i{
+    cursor: pointer;
+}

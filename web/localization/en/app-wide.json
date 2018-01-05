@@ -1,0 +1,62 @@
+{
+        "app-wide": {
+                "pesquisa": {
+                        "text": "",
+                        "applyTo": "class",
+                        "attributes": {
+                                "placeholder": "Search..."
+                        }
+                },
+                "edit-account-text": {
+                        "text": "Edit Account",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "edit-language-text": {
+                        "text": "Select another language",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "exit-text": {
+                        "text": "Logout",
+                        "applyTo": "class",
+                        "attributes": {}
+                },
+                "messages-text": {
+                        "text": "Messages",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "share-text": {
+                        "text": "Share...",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "sysadmin-area-text": {
+                        "text": "Administrator Area",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "conf-modal-cancel": {
+                        "text": "",
+                        "applyTo": "id",
+                        "attributes": {
+                                "data-tooltip": "Cancel"
+                        }
+                },
+                "conf-modal-confirm": {
+                        "text": "",
+                        "applyTo": "id",
+                        "attributes": {
+                                "data-tooltip": "Confirm"
+                        }
+                },
+                "number-badge": {
+                        "text": "",
+                        "applyTo": "class",
+                        "attributes": {
+                                "data-badge-caption": "new"
+                        }
+                }
+        }
+}

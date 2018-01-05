@@ -1,0 +1,66 @@
+<div class="modal-content">
+    <div class="col s10 offset-s1">
+    <form id="validation-form">
+        <div class="row">
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="edit-username" type="text" autocomplete="nope" class="validate invalid" required>
+                    <label for="edit-username" id="username-label"></label>
+                </div>
+
+                <div class="input-field col s12">
+                    <input id="edit-email" type="email" autocomplete="nope" class="validate invalid" required>
+                    <label for="edit-email" id="email-label"></label>
+                </div>
+
+                <div class="input-field col s12">
+                    <input id="edit-password" type="password" autocomplete="new-password" class="validate invalid" required>
+                    <label for="edit-password" id="password-label"></label>
+                    <input type="submit" id="validation" style="display: none" />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="switch col s6">
+            <p>LDAP</p>
+            <label>
+                <span class="no-label"></span>
+                <input type="checkbox" id="edit-ldap">
+                <span class="lever"></span>
+                <span class="yes-label"></span>
+            </label>
+        </div>
+
+        <div class="switch col s6">
+            <p>SysAdmin</p>
+            <label>
+                <span class="no-label"></span>
+                <input type="checkbox" id="edit-sysadmin">
+                <span class="lever"></span>
+                <span class="yes-label"></span>
+            </label>
+        </div>
+    </div>
+</div>
+</div>
+<div class="modal-footer">
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col s12">
+            <a class="btn waves-effect waves-light tooltipped" id="user-modal-cancel-button" data-position="top" data-delay="50" data-tooltip="Cancelar" name="action" onclick=" $('#user-modal').modal('close');"><i class="material-icons">cancel</i>
+            </a>
+            <a class="btn waves-effect waves-light confirm-button tooltipped" id="user-modal-create-button" data-position="top" data-delay="50" data-tooltip="Criar" name="action" onClick="SysAdminUserManagement.createUser()"><i class="material-icons">save</i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<link href="./css/modal_Stuff.css" rel="stylesheet" type="text/css"/>
+<script src="./js/UserModal.js" type="text/javascript"></script>
+
+<script>
+    UserModal.enableEditMode();
+    LocalizationManager.applyLocaleSettingsToGivenView('user_edit_modal');
+    $('.tooltipped').tooltip({delay: 50});
+</script>

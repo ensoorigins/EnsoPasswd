@@ -1,0 +1,55 @@
+<input type="hidden" id="current-folder" />
+
+<div class="row" style="padding-top: 20px; min-height: 30px;" id="top-bar">
+    <div class="col s11 valign-wrapper">
+        <i id="home-button" class="small enso-main-color-text material-icons circle" onclick="UserFolderView.goToRootFolder();" style="padding: 0px 10px; cursor: pointer;">home</i>
+        <i id="parent-button" class="small enso-main-color-text material-icons circle" onclick="UserFolderView.goToParentFolder();"
+            style="padding: 0px 10px; cursor: pointer;">arrow_upward</i>
+        <div class="col s12 valign-wrapper" id="breadcrumbs">
+
+        </div>
+    </div>
+    <div class="col s1">
+        <i class="small enso-main-color-text material-icons circle right" id="edit-folder-icon" onclick="UserFolderView.launchFolderEditModal();"
+            style="padding: 0px 10px; cursor: pointer;">settings</i>
+    </div>
+</div>
+
+<div class="row" style="margin-bottom: 0px;">
+    <div class="divider"></div>
+</div>
+
+<div class="row">
+    <table class="highlight striped bordered col s10 offset-s1 grey-text text-darken-2" style="cursor:pointer" id="tabela-folders">
+
+    </table>
+</div>
+
+<div id="folder-modal" class="modal modal-fixed-footer">
+
+</div>
+
+<div class="fixed-action-btn" id="addMenu">
+    <a class="btn-floating btn-large enso-main-color">
+        <i class="large material-icons">add</i>
+    </a>
+    <ul>
+        <li>
+            <a class="btn-floating enso-main-color tooltipped" id="create-new-folder-button" data-position="left" data-delay="50" onclick="UserFolderView.launchFolderAddModal()">
+                <i class="material-icons">create_new_folder</i>
+            </a>
+        </li>
+        <li>
+            <a class="btn-floating enso-main-color tooltipped" id="create-new-credential-button" data-position="left" data-delay="50"
+                onclick="UserFolderView.launchCredentialAddModal()">
+                <i class="material-icons">lock_outline</i>
+            </a>
+        </li>
+    </ul>
+</div>
+<script src="./js/modalUtils.js" type="text/javascript"></script>
+<script src="./js/FolderActions.js" type="text/javascript"></script>
+<script src="./js/PasswordUtil.js" type="text/javascript"></script>
+<script src="./js/folders.js" type="text/javascript"></script>
+<script src="./js/CredentialActions.js" type="text/javascript"></script>
+<script src="./js/ShareModal.js" type="text/javascript"></script>

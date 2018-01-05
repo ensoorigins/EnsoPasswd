@@ -1,0 +1,4 @@
+.eslintrc.json
+*.bak
+api/passwd.conf.php
+*composer*

@@ -1,0 +1,60 @@
+<div class="modal-content">
+
+    <div class="row">
+
+        <div class="row">
+            <div class="col s11">
+
+            </div>
+            <div class="col s1">
+                <i class="material-icons right" onclick=" $('#folder-modal').modal('close');">close</i>
+            </div>
+        </div>
+        <div class="col s10 offset-s1">
+            <div class="row">
+                <form id="validation-form">
+                    <div class="input-field col s12">
+                        <input id="edit-name" type="text" autocomplete="nope" class="validate invalid" required>
+                        <label for="edit-name" id="label-name"></label>
+                        <input type="submit" id="validation" style="display:none" />
+                    </div>
+                </form>
+            </div>
+
+
+            <div class="row valign-wrapper" id="autocomplete-row">
+                <div class="input-field col s12" style="margin: 0px;">
+                    <input type="text" id="autocomplete-input" class="autocomplete">
+                    <label for="autocomplete-input" id="user-permission-add-label"></label>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <table class="bordered" id="user-table">
+                <tbody id="user-list-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <div class="row">
+        <div class="col s12">
+            <a class="btn waves-effect waves-light tooltipped" id="folder-modal-cancel-button" data-position="top" data-delay="50"
+                name="action" onclick=" $('#folder-modal').modal('close');">
+                <i class="material-icons">cancel</i>
+            </a>
+            <a class="btn waves-effect waves-light confirm-button tooltipped" id="folder-modal-create-button" data-position="top"
+                data-delay="50" name="action" onClick="SysAdminFolderManagement.createFolder()">
+                <i class="material-icons">save</i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<link href="./css/modal_Stuff.css" rel="stylesheet" type="text/css" />
+<script src="./js/FolderModal.js" type="text/javascript"></script>
+<script>
+    LocalizationManager.applyLocaleSettingsToGivenView('folder_modal');
+    $('.tooltipped').tooltip({ delay: 50 });
+</script>

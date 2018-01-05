@@ -1,0 +1,11 @@
+{
+    "external_link":
+            {
+                "strings": 
+                        {
+                            "external-not-found": "Esta chave de link externo não foi encontrada.",
+                            "external-found" : "Olá, um utilizador desta plataforma partilhou um link confidencial consigo, este link contém uma credencial.\n\nAs informações apresentadas aqui são confidenciais, e não devems er partilhadas com mais ninguém se o consetimento do utilziador que lhe forneceu este link.",
+                            "link-copy": "Link copiada para a área de transferência."
+                        }
+            }
+}

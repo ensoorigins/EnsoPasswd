@@ -1,0 +1,91 @@
+{
+    "folder_modal":
+            {
+                "label-name": 
+                        {
+                            "text": "Name",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-permission-add-label": 
+                        {
+                            "text": "Add user access...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "folder-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancel"
+                                    }
+                        },
+                "folder-modal-create-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Create"
+                                    }
+                        },
+                "folder-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Save"
+                                    }
+                        },
+                "folder-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remove"
+                                    }
+                        },
+                "remove-access-button":
+                        {
+                            "text": "Remove access",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "enums":
+                        {
+                            "userType":
+                                    {
+                                        "0": "Normal user",
+                                        "1": "Folder administrator"
+                                    },
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Press to go into view mode",
+                                        "locked": "Press to go into edit mode"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "There is already a folder with that name in this directory",
+                                        "2": "The name fied is mandatory",
+                                        "3": "You cannot attribute permission to a non-existent user"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Are yo sure you wish to delete this folder?"
+                        }
+            }
+}

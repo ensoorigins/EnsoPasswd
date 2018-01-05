@@ -1,0 +1,107 @@
+{
+    "user_edit_modal":
+            {
+                "username-label": 
+                        {
+                            "text": "Username",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "password-label": 
+                        {
+                            "text": "Password",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "email-label": 
+                        {
+                            "text": "Email",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "no-label":
+                        {
+                            "text": "Disabled",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "yes-label":
+                        {
+                            "text": "Enabled",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancel"
+                                    }
+                        },
+                "user-modal-create-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Create"
+                                    }
+                        },
+                "user-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Save"
+                                    }
+                        },
+                "user-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remove"
+                                    }
+                        },
+                "enums":
+                        {
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Press to go into view mode",
+                                        "locked": "Press to go into edit mode"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "Invalid email",
+                                        "2": "Invalid LDAP value",
+                                        "3": "Invalid sysamdin value",
+                                        "4": "Username is mandatory",
+                                        "5": "A user with that username already exists",
+                                        "6": "Password is mandatory"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Are yo sure you wish to delete this user?"
+                        }
+            }
+    }

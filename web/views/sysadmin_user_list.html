@@ -1,0 +1,25 @@
+<table class="bordered centered highlight" id="user-table">
+    <thead>
+        <tr>
+            <th id="username-header"></th>
+            <th id="email-header"></th>
+        </tr>
+    </thead>
+
+    <tbody id="user-list-body">
+    </tbody>
+</table>
+
+<!-- Modal Structure -->
+<div id="user-modal" class="modal modal-fixed-footer">
+    
+</div>
+
+  <div class="fixed-action-btn">
+    <a onclick="SysAdminUserManagement.launchUserAddModal()" id="create-user-button" class="btn-floating btn-large enso-main-color tooltipped" data-position="left" data-delay="50" data-tooltip="Criar Utilizador">
+      <i class="large material-icons">person_add</i>
+    </a>
+  </div>
+<script src="./js/modalUtils.js" type="text/javascript"></script>
+<script src="./js/UserActions.js" type="text/javascript"></script>
+<script src="./js/sysadmin_user_list.js" type="text/javascript"></script>

@@ -1,0 +1,106 @@
+{
+    "message_modal":
+            {
+                "title-label": 
+                        {
+                            "text": "Titulo",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "username-label": 
+                        {
+                            "text": "Nome de utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "password-label": 
+                        {
+                            "text": "Senha",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "description-label": 
+                        {
+                            "text": "Descrição",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "url-label": 
+                        {
+                            "text": "Url",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "message-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancelar"
+                                    }
+                        },
+                "message-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Guardar"
+                                    }
+                        },
+                "message-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remover"
+                                    }
+                        },
+                "saveto-text": 
+                        {
+                            "text": "Guardar em...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                "enums":
+                        {
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Pressione para entrar no modo de vista",
+                                        "locked": "Pressione para entrar no modo de edição"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "Url inválido",
+                                        "2": "Titulo inválido",
+                                        "3": "Já existe uma credencial com esse titulo nesta pasta",
+                                        "4": "É obrigatório existir uma senha",
+                                        "5": "Pasta não existe"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Tem a certeza de que quer remover esta mensagem?"
+                        }
+            }
+}

@@ -1,0 +1,17 @@
+{
+    "defaultLanguage" : "pt",
+    
+    "languages" :
+    {
+        "en" : 
+            {
+                "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABLElEQVQ4y2P4//8/AyUYBNiAWAiIJUjEQlC9DKKurv3/Z806/h8X/d4xGCsG6QUZoDBjxrH/JSWr/2/efBUrjQuA9IIMULax6fy/evXF/0HB0/8vXHj6fzCUDgqaBqY/BCSg4E/Jhf/fWniDDFAGG9Dff+B/aOiM/zNnHv/v7NyLQWMDf/78QRigo1MLVmxs3PJ/woRDGPRbPScU/M4u8P8TDRuEAQ0NG//Ly1f8r63d/l9AIB+Dxgbev3+PMEBaOvt/c/Pu/3x8uf9rarZj0K84FVDwazGd/1fFtRAG3L9//z+pAKQHbsBRDun/rwTU/r/kkCcKg9SC9MANuHDhAskuAOmBGSC7i1HkPzkYpBdkAD8QawGxOYlYC6qXgRmIOYGYh0TMCdZLaXYGALT4FdiUi8+FAAAAAElFTkSuQmCC",
+                "name" : "English"
+            },
+        "pt" : 
+            {
+                "image" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB00lEQVQ4y6WTTWtTQRSGn7lzk2tym0ZJmypBREUEsSC4dCOIbsSFf8ifYXGhoG5cunIhrnQjuIggKogfVatRU2+TJs2dO58uGk0KZhF6YBgYOA/vmfO+IoTAfkoAZWBhfM9TGhjGQP3awxu//r46IZAhcOv265mdwXnixiFW7t9pxkDqvOfc8gkAvBBEIZCszhYdvMN+/gqQxoA0zjLQOV01xMtAK9rh98ENFl96hIMQiz2IqF4HawBkDFBYTVbsoG2fi26TWneE7/bITiUsvvXIDEK0ZwhsoQGIAfJC8WM04vLyO66/2SYfXMUflejNJwyPdak9TQglYLyw4B3a+QlAqYKe/05W+kB7PUFeuoKtVWit3SU/8oVkI91tHk8i0irq8MqUAjVCyyodUyFf6HP6xSNsOSU+v0WyDowCJBO/BGNReT4FyAuiapnnW01Orm6Tte9xod3Dnc1JHpdAOPBTezCGQhW7HwqgC4XAkZkKN3+e4cHxJkU5orGWEHVKUBIgJif4gFJqokBrwwEC1TjCiJiPusnSs0+4svyvP4N1FMb8A+hgHf33HQBsJIh94FW/N9uJ1iGXGgBaAHWgBdTmzMIA+CYAOQ6SnBPgAC32G+c/Y6vWfWSX0V0AAAAASUVORK5CYII=",
+                "name" : "Português"
+            }
+    }
+}

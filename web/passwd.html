@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Enso PASSWD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/materialize.css" rel="stylesheet" type="text/css" />
+    <link href="css/material-icons.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/external/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script src="js/external/js.cookie.js" type="text/javascript"></script>
+    <script src="js/external/materialize.js" type="text/javascript"></script>
+    <script src="enso_conf.js"></script>
+    <script src="js/external/jquery.md5.js" type="text/javascript"></script>
+    <script src="js/tabChecker.js" type="text/javascript"></script>
+    <script src="js/InfiniteScroller.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="./css/custom.css">
+
+    
+    <script src="js/materialize_init.js" type="text/javascript"></script>
+   
+    <script src="js/ensoshared_js_lib/ensoshared.js" type="text/javascript"></script>
+    <script src="js/modalUtils.js" type="text/javascript"></script>
+    <script src="js/PasswordUtil.js" type="text/javascript"></script>
+    <script src="js/account_edit_modal.js" type="text/javascript"></script>
+
+    <script src="js/consts.js" type="text/javascript"></script>
+    <script src="js/UserActions.js" type="text/javascript"></script>
+    <script src="js/LanguageModal.js" type="text/javascript"></script>
+    <script src="js/MessageActions.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+    <div class="navbar-fixed" id='header'>
+        <nav class="nav-border enso-main-color">
+            <div class="nav-wrapper">
+                <div class="row">
+                    <div class="col l3 xl3">
+                        <img class="brand-logo" href="" onclick="ensoConf.goToPage('folders')" style="position:absolute; top: 0; bottom:0; margin: auto; width: 20%; cursor:pointer; margin-left: 0.5em;" src="img/logo.png" />
+                        <a href="#" data-activates="mobile-menu" class="button-collapse">
+                            <i class="material-icons">menu</i>
+                        </a>
+                    </div>
+
+                    <div class="col l3 xl4 hide-on-med-and-down center-align">
+                        <div class="search-wrapper">
+                            <div class="input-field z-depth-1" style='width: 100%'>
+                                <input type="search" class="pesquisa" id="pesquisa-desktop">
+                                <label class="label-icon" for="search">
+                                    <i class="material-icons">search</i>
+                                </label>
+                                <i id="clear-search-button" style="display: none" onclick="$('#pesquisa-desktop').val(''); $('#pesquisa-desktop').trigger('input');" class="material-icons closed">close</i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col l6 xl5 hide-on-med-and-down">
+                        <ul class="right nav-icons-wrapper">
+                            <li class="user-sysadmin">
+                                <div onclick="ensoConf.goToPage('sysadmin')">
+                                    <a class="valign-wrapper">
+                                        <i class="material-icons">build</i>
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="user-message">
+                                <div onclick="ensoConf.goToPage('messages')">
+                                    <a class="valign-wrapper">
+                                        <i class="material-icons left">chat_bubble_outline</i>
+                                        <span class="new badge right number-badge"></span>
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="user-info">
+                                <div class="valign-wrapper">
+                                    <a class='dropdown-button valign-wrapper' href='#' data-activates='user-dropdown'>
+                                        <i class=" medium material-icons left">person_outline</i>
+                                        <span class="text-white flow-text username-label"></span>
+                                    </a>
+                                    <ul id='user-dropdown' class='dropdown-content enso-main-color'>
+                                        <li onclick="LanguageModal.show()">
+                                            <a class="white-text">
+                                                <i class="material-icons white-text">language</i>
+                                                <span class="edit-language-text"></span>
+                                            </a>
+                                        </li>
+                                        <li onclick="AccountModal.show()">
+                                            <a class="white-text">
+                                                <i class="material-icons white-text">settings</i>
+                                                <span class="edit-account-text"></span>
+                                            </a>
+                                        </li>
+                                        <li onclick="logout()" class="user-logout">
+                                            <a class="white-text">
+                                                <i class="material-icons white-text">exit_to_app</i>
+                                                <span class="exit-text"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <ul class="side-nav" id="mobile-menu">
+                        <li class="collection-item user-info">
+                            <div class="row">
+                                <div class="col s4 valign-wrapper" style="height: 76px">
+                                    <i class="large material-icons enso-main-color-text" id="sidebar-user-icon">account_circle</i>
+                                </div>
+                                <div class="col s8 valign-wrapper">
+                                    <p class="black-text flow-text username-label"></p>
+                                </div>
+                            </div>
+                            <div class="divider s12"></div>
+                        </li>
+                        <li class="collection-item search-wrapper">
+                            <form class="left">
+                                <div class="input-field" style='width: 100%'>
+                                    <input id="pesquisa-mobile" type="search" class="pesquisa">
+                                    <label class="label-icon" for="search">
+                                        <i class="material-icons" style="color: rgba(0, 0, 0, 0.54)">search</i>
+                                    </label>
+                                    <i class="tiny material-icons closed">close</i>
+                                </div>
+                            </form>
+                        </li>
+                        <li class="collection-item avatar user-message">
+                            <a href="#" class="left">
+                                <i class="material-icons left">message</i>
+                                <span class="title">
+                                    <span id="messages-text"></span>
+                                    <span class="new badge right enso-main-color-lighter number-badge"></span>
+                                </span>
+                                <p></p>
+                            </a>
+                        </li>
+                        <li class="collection-item avatar user-sysadmin">
+                            <a class="left" onclick="$('.button-collapse').sideNav('hide'); ensoConf.goToPage('sysadmin');">
+                                <i class="material-icons left">lock_open</i>
+                                <span class="title" id="sysadmin-area-text"></span>
+                                <p></p>
+                            </a>
+                        </li>
+                        <li class="collection-item avatar user-logout">
+                            <a class="left" onclick="logout()">
+                                <i class="material-icons left">exit_to_app</i>
+                                <span class="title exit-text">Sair</span>
+                                <p></p>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="nav-content" id="header-tabs">
+
+            </div>
+        </nav>
+    </div>
+    <div class="fill-height" id="main-content">
+    </div>
+
+    <div id="loader" style="display: none">
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-red">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-yellow">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-green">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>ensoConf.loadFirstView('folders')</script>
+    <script src="js/LocalizationManager.js" type="text/javascript"></script>
+</body>
+
+</html>

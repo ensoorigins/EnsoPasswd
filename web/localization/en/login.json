@@ -1,0 +1,19 @@
+{
+    "login": {
+        "username-label": {
+            "text": "Username",
+            "applyTo": "id",
+            "attributes": {}
+        },
+        "password-label": {
+            "text": "Password",
+            "applyTo": "id",
+            "attributes": {}
+        },
+        "enums": {
+            "validationErrors": {
+                "1": "The application unusable until you delete the setup folder! Please contact your system's administrator."
+            }
+        }
+    }
+}

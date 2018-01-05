@@ -1,0 +1,169 @@
+{
+    "sysadmin":
+            {
+                "username-header": 
+                        {
+                            "text": "Username",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "email-header": 
+                        {
+                            "text": "Email",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "all-facility": 
+                        {
+                            "text": "All",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "all-severity": 
+                        {
+                            "text": "All",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "facility-label": 
+                        {
+                            "text": "Facility",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "filter-from-label": 
+                        {
+                            "text": "Start date",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "filter-to-label": 
+                        {
+                            "text": "End date",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "severity-label": 
+                        {
+                            "text": "Severity",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-filter-label": 
+                        {
+                            "text": "Filter by user",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "date-header": 
+                        {
+                            "text": "Date",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "action-header": 
+                        {
+                            "text": "Action",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-header": 
+                        {
+                            "text": "User",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "create-user-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Create User"
+                                    }
+                        },
+                "user-tab-text": 
+                        {
+                            "text": "Users",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "logs-tab-text": 
+                        {
+                            "text": "Logs",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "folder-tab-text": 
+                        {
+                            "text": "Root folder management",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "enums":
+                        {
+                            "severityStrings":
+                                    {
+                                        "0": "Emergency",
+                                        "1": "Alert",
+                                        "2": "Critical",
+                                        "3": "Error",
+                                        "4": "Warning",
+                                        "5": "Notice",
+                                        "6": "Informational",
+                                        "7": "Debug"
+                                    }
+                        },
+                "strings": 
+                        {
+                            "today": "Today",
+                            "clear": "Clear",
+                            "close": "Confirm"
+                        }
+            }
+}

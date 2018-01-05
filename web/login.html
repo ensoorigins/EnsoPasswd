@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Enso PASSWD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/materialize.css" rel="stylesheet" type="text/css" />
+    <link href="css/material-icons.css" rel="stylesheet" type="text/css" />
+    <link href="css/login.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/external/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <script src="js/external/js.cookie.js" type="text/javascript"></script>
+    <script src="js/external/materialize.js" type="text/javascript"></script>
+    <script src="js/consts.js" type="text/javascript"></script>
+    <script src="enso_conf.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col s12">
+            <div id="login-icon-container">
+                <img src="img/enso_logo_branco.png">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <img src="img/logo-login.png" id="logo" />
+        </div>
+    </div>
+    <div id="login-inputs">
+        <div class="row">
+            <div class="col s12">
+                <input type="text" id="edit-username-login" placeholder="Username" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <input type="password" id="edit-password-login" placeholder="Password" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <a onclick="performLogin();" class="waves-effect waves-light btn-large" id="login-btn">Login</a>
+        </div>
+    </div>
+
+    <script src="js/login.js" type="text/javascript"></script>
+</body>
+
+</html>

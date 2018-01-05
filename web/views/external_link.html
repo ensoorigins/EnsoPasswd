@@ -1,0 +1,44 @@
+<div class="row">
+    <p id="intro-text" style='white-space: pre-line; text-align: center; text-justify: inter-word; padding-top: 1em'></p>
+
+    <form id="validation-form" class="col-s10 offset-s1">
+        <div class="row">
+            <div class="input-field col s12" style="height: 5em">
+                <textarea id="edit-message" style="max-height: 3.5em" class="materialize-textarea" disabled autocomplete="nope"></textarea>
+                <label for="edit-message" id="message-label"></label>
+            </div>
+            <div class="input-field col s12">
+                <input id="edit-title" type="text" autocomplete="nope" disabled/>
+                <label for="edit-title" id="title-label"></label>
+            </div>
+            <div class="input-field col s12" style="display: flex">
+                <input id="edit-username" type="text" autocomplete="nope" disabled/>
+                <label for="edit-username" id="username-label"></label>
+                <i class="material-icons right" onclick="CredentialModal.copyUsernameToClipboard()">content_copy</i>
+            </div>
+            <div class="input-field col s12 valign-wrapper" style="display: flex">
+                <input id="edit-password" type="password" autocomplete="new-password" disabled />
+                <label for="edit-password" id="password-label"></label>
+                <i class="material-icons right" id="edit-look" onmousedown="$('#edit-password').clone().attr('type', 'text').insertAfter('#edit-password').prev().remove();"
+                    onmouseup="$('#edit-password').clone().attr('type', 'password').insertAfter('#edit-password').prev().remove();">remove_red_eye</i>
+                <i class="material-icons right" onclick="CredentialModal.copyPasswordToClipboard()">content_copy</i>
+            </div>
+            <div class="input-field col s12" style="display: flex">
+                <input id="edit-url" type="url" autocomplete="nope" disabled>
+                <label for="edit-url" id="url-label"></label>
+                <i class="material-icons right" onclick="CredentialModal.openUrl()">open_in_new</i>
+                <input type="submit" id="validation" style="display: none" />
+            </div>
+            <div class="input-field col s12">
+                <textarea id="edit-description" class="materialize-textarea" autocomplete="nope" disabled></textarea>
+                <label for="edit-description" id="description-label"></label>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script src="js/ExternalMessageActions.js" type="text/javascript"></script>
+<script src="js/external_link.js" type="text/javascript"></script>
+<script src="js/modal_folders_edit_credential.js" type="text/javascript"></script>
+<link href="css/modal_Stuff.css" rel="stylesheet" type="text/css" />

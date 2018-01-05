@@ -1,0 +1,170 @@
+{
+    "sysadmin":
+            {
+                "username-header": 
+                        {
+                            "text": "Nome de utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "email-header": 
+                        {
+                            "text": "Email",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "all-facility": 
+                        {
+                            "text": "Todas",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "all-severity": 
+                        {
+                            "text": "Todas",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "facility-label": 
+                        {
+                            "text": "Categoria",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "filter-from-label": 
+                        {
+                            "text": "Começo",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "filter-to-label": 
+                        {
+                            "text": "Fim",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "severity-label": 
+                        {
+                            "text": "Gravidade",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-filter-label": 
+                        {
+                            "text": "Filtrar por utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "date-header": 
+                        {
+                            "text": "Data",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "action-header": 
+                        {
+                            "text": "Ação",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-header": 
+                        {
+                            "text": "Utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "create-user-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Criar Utilizador"
+                                    }
+                        },
+                "user-tab-text": 
+                        {
+                            "text": "Utilizadores",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                "logs-tab-text": 
+                        {
+                            "text": "Logs",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "folder-tab-text": 
+                        {
+                            "text": "Gestão de pastas root",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "enums":
+                        {
+                            "severityStrings":
+                                    {
+                                        "0": "Emergência",
+                                        "1": "Alerta",
+                                        "2": "Crítica",
+                                        "3": "Erro",
+                                        "4": "Aviso",
+                                        "5": "Nota",
+                                        "6": "Informacional",
+                                        "7": "Debug"
+                                    }
+                        },
+                "strings": 
+                        {
+                            "today": "Hoje",
+                            "clear": "Limpar",
+                            "close": "Confirmar",
+                            "logs-load-failure": "Oops something went wrong loading your logs..."
+                        }
+            }
+}

@@ -1,0 +1,28 @@
+{
+    "login":
+            {
+                "username-label": 
+                        {
+                            "text": "Nome de Utilizador",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                        "password-label": 
+                        {
+                            "text": "Senha",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        
+                                    }
+                        },
+                        "enums": {
+                            "validationErrors": {
+                                "1": "A aplicação não é utilizável até eliminar a pasta setup! Por favor contacte o seu administrador de sistema."
+                            }
+                        }
+            }
+}

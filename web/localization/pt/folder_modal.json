@@ -1,0 +1,91 @@
+{
+    "folder_modal":
+            {
+                "label-name": 
+                        {
+                            "text": "Nome",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "user-permission-add-label": 
+                        {
+                            "text": "Adicionar acesso...",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "folder-modal-cancel-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Cancelar"
+                                    }
+                        },
+                "folder-modal-create-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Criar"
+                                    }
+                        },
+                "folder-modal-save-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Guardar"
+                                    }
+                        },
+                "folder-modal-remove-button": 
+                        {
+                            "text": "",
+                            "applyTo": "id",
+                            "attributes": 
+                                    {
+                                        "data-tooltip": "Remover"
+                                    }
+                        },
+                "remove-access-button":
+                        {
+                            "text": "Remover accesso",
+                            "applyTo": "class",
+                            "attributes": 
+                                    {
+
+                                    }
+                        },
+                "enums":
+                        {
+                            "userType":
+                                    {
+                                        "0": "Utilizador normal",
+                                        "1": "Administrador de pasta"
+                                    },
+                            "lockButtonState":
+                                    {
+                                        "unlocked": "Pressione para entrar em modo de visualização",
+                                        "locked": "Pressione para entrar em modo de edição"
+                                    },
+                            "validationErrors":
+                                    {
+                                        "1": "Já existe uma pasta com esse nome nesta diretctoria",
+                                        "2": "O nome é obrigatório",
+                                        "3": "Não pode atribuir permissões a utilziadores inexistentes"
+                                    }
+                        },
+                "strings":
+                        {
+                            "remove-confirmation": "Tem a certeza de que quer remover esta pasta?"
+                        }
+            }
+}

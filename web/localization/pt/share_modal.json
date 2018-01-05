@@ -1,0 +1,49 @@
+{
+        "share_modal": {
+                "share-with-label": {
+                        "text": "Partilhar com...",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "message-label": {
+                        "text": "Messagem",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "label-6-hours": {
+                        "text": "6 horas",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "label-12-hours": {
+                        "text": "12 horas",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "label-24-hours": {
+                        "text": "24 horas",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "label-7-days": {
+                        "text": "7 dias",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "external-toggle-label": {
+                        "text": "Utilizador externo",
+                        "applyTo": "id",
+                        "attributes": {}
+                },
+                "enums": {
+                        "validationErrors": {
+                                "1": "Utilizador destino não existe",
+                                "2": "A credencial que está a tentar partilhar não existe",
+                                "3": "Duração inválida"
+                        }
+                },
+                "strings": {
+                        "external-share-success": "O seu link de partilha é:"
+                }
+        }
+}

@@ -1,0 +1,333 @@
+.input-field input
+{
+    border-radius: 5px !important;
+    height: 100% !important;
+    margin-bottom: 0px !important;
+}
+
+#pesquisa-desktop{ /* blend input with wrapper because with is smaller when input is with focus */
+    border-bottom-color: rgb(72, 72, 72);
+    box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.14); /* negative blur to apply only to the bottom portion */
+    border-bottom-right-radius: 0px !important;
+}
+
+.search-wrapper > div{
+    background-color: #153344;
+}
+
+@media (min-width: 0px)
+{
+    .input-field {
+        top: calc(100% * 0.25) !important;
+    }
+
+    .input-field .label-icon{
+        top: calc(100% * -0.75 ) !important;
+        left: 0px !important;
+    }
+
+    .input-field .material-icons{
+        top: calc(100% * -0.4) !important;
+        font-size: 1.75em !important;
+    }
+
+    .input-field input
+    {
+        border-radius: 0px !important;
+    }
+
+    nav form {
+        height: 48px;
+        width: 100%;
+        padding-left: 32px;
+        padding-right: 32px;
+        margin-bottom: 0px;
+    }
+}
+
+@media (min-width: 992px)
+{
+    .input-field input
+    {
+        border-radius: 5px !important;
+    }
+
+    .input-field .label-icon{
+        top: calc(100% * -0.375) !important;
+    }
+
+    .input-field .material-icons{
+        top: calc(100% * -0.15) !important;
+        padding-left: 1em;
+    }
+
+    nav form {
+        height: 100%;
+        width: 100%;
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-bottom: 0px;
+    }
+
+    nav, nav > div > div >div > a, .nav-icons-wrapper li > div > a{
+        height: 100px;
+        vertical-align: middle;
+        line-height: 100px;
+    }
+
+    nav .nav-wrapper .row,  .nav-wrapper .row .col, .navbar-fixed{
+        height: 100px !important;
+        margin:0px 0px; 
+    }
+
+    .search-wrapper{
+        height: 100px;
+    }
+
+    .search-wrapper .input-field{
+        height: 50px !important;
+        top: 25px !important;
+    }
+}
+
+.input-field {
+    border-radius: 5px;
+    height: 32px !important;
+}
+
+.collection-item a {
+    width: 100%;
+}
+
+.collection-item .row{
+    margin-bottom: 0px;
+}
+
+#sidebar-user-icon{
+    font-size: 4em !important;
+}
+
+/* COLOR DEFINITIONS */
+.indicator {
+    background-color: #FF5D26 !important;
+}
+
+.enso-main-color{
+    background-color: #133849 !important;
+}
+
+.enso-main-color-lighter{
+    background-color: #FF5D26 !important;
+}
+
+.enso-main-color-lighter-text{
+    color: #00a0cc !important;
+}
+
+.enso-main-color-text{
+    color: #FF5D26 !important;
+}
+
+.enso-orange-text{
+    color: #FF5D26 !important;
+}
+.badge{
+    background-color: #153344 !important;
+}
+
+[type="checkbox"]:checked + label:before{
+    color: #FF5D26 !important;
+    border-bottom: 2px solid #FF5D26;
+    border-right: 2px solid #FF5D26;
+}
+
+.modal-content > .row > .col > i, .modal-content > .row >.row > .col > i{
+    color: #FF5D26;
+}
+
+.modal-footer  > .row > .col > *{
+    background-color: transparent;
+    border: solid 2px #FF5D26;
+    color: #FF5D26;
+}
+
+.modal-footer  > .row > .col >a > i{
+    line-height: 1.7em;
+}
+
+.modal-footer  > .row > .col >a{
+    box-shadow: none !important;
+}
+
+.confirm-button{
+    background-color: #153344 !important;
+    border: solid 2px transparent !important;   
+}
+
+#user-list-body{
+    font-size: 1.5em;
+}
+
+input:not([type="checkbox"]):not([type="radio"]){
+    font-size: 1.1em;
+}
+
+.confirm-button > i {
+    color: white;
+}
+
+.switch label input[type=checkbox]:checked + .lever{
+    background-color: rgb(250, 144, 109);
+}
+.switch label input[type=checkbox]:checked + .lever:after{
+    background-color: #FF5D26;
+}
+
+.navbar-fixed {
+    z-index: 9999;
+}
+
+.navbar-fixed .col:nth-child(3) i {
+    color: #FF5D26 !important;
+    font-size: 2em;
+}
+
+.login-wrapper{
+    height: 100%;
+    
+    margin-top: 20px;
+
+    /* Bottom text vertically */
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: -webkit-flex !important;
+    display: flex !important;
+    -webkit-box-pack: center !important;
+    -ms-flex-pack: center !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    -webkit-align-items: center !important;
+    align-items: center !important;
+}
+
+#pesquisa-mobile::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:    grey;
+}
+#pesquisa-mobile:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   color:    grey;
+   opacity:  1;
+}
+#pesquisa-mobile::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color:    grey;
+   opacity:  1;
+}
+#pesquisa-mobile:-ms-input-placeholder { /* Internet Explorer 10-11 */
+   color:    grey;
+}
+#pesquisa-mobile::-ms-input-placeholder { /* Microsoft Edge */
+   color:    grey;
+}
+
+.select-wrapper{
+    height: 100%;
+}
+
+.autocomplete-content{
+    margin-top: 4px;
+    overflow: visible;
+    position: relative;
+}
+
+.breadcrumb{
+    color: black;
+}
+
+.breadcrumb::before{
+    color: black;
+}
+
+.breadcrumb:last-child{
+    color: black;
+}
+
+#loader{
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+}
+
+#tabela-folders tr td p:first-child {
+    margin-top: 0px;
+}
+
+#tabela-folders tr td p:last-child {
+    margin-bottom: 0px;
+}
+
+table#tabela-folders tr td:first-child i
+{
+    font-size: 3em;
+}
+
+table#tabela-folders tr td:first-child
+{
+    text-align: center;
+}
+
+#tabela-folders tr{
+    height: 100px;
+}
+
+
+table.highlight > tbody > tr:hover {
+    background-color: #dadada !important;
+  }
+
+#main-content{
+    background-image: url("../img/pattern_bg.png");
+    background-repeat: repeat;
+}
+
+@media 
+(-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) { 
+    background-image: url("../img/pattern_bg_@2X.png");
+}
+
+/*.fixed-action-btn > a{
+    width: 96px !important;
+    height: 96px !important;
+}
+
+.fixed-action-btn > a > i {
+    margin-top: 18px;
+    font-size: 64px;
+}
+
+.fixed-action-btn > ul{
+    bottom: 96px; 
+}
+
+.fixed-action-btn > ul > li > a{
+    width: 64px !important;
+    height: 64px !important;
+}
+
+.fixed-action-btn > ul > li > a > i{
+    margin-top: 10px;
+    font-size: 32px;
+}
+*/
+
+.nav-icons-wrapper  > li{
+    border-left: 2px solid #153344;
+    min-width: 8em;
+}
+
+label{
+    color: #153344 !important;
+}
+
+#password-options > .col {
+    margin-top: 1em !important;
+}
