@@ -57,7 +57,7 @@ var EnsoShared = {
 		iv = "";
 
 		for (i = 0; i < 16; i++)
-			iv += String.fromCharCode(PasswordUtil._getRandomByte());
+			iv += String.fromCharCode(EnsoShared._getRandomByte());
 
 		var textBytes = EnsoShared.stringToBytes(EnsoShared.ensoPad(data));
 
@@ -259,6 +259,23 @@ var EnsoShared = {
 			return initHash.substring(0, EnsoShared.BLOCK_SIZE);
 		}
 		return null;
+	},
+
+	_getRandomByte: function () {
+		// http://caniuse.com/#feat=getrandomvalues
+		if (window.crypto && window.crypto.getRandomValues) {
+			var result = new Uint8Array(1);
+			window.crypto.getRandomValues(result);
+			return result[0];
+		}
+		else if (window.msCrypto && window.msCrypto.getRandomValues) {
+			var result = new Uint8Array(1);
+			window.msCrypto.getRandomValues(result);
+			return result[0];
+		}
+		else {
+			return Math.floor(Math.random() * 256);
+		}
 	},
 
 	init: function () {

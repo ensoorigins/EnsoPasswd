@@ -3,10 +3,10 @@
 * XAMP Stack
    * Apache >= 2
    * PHP >= 7
-      * php-mcrypt
+      * php-openssl
       * php-mysql
       * php-ldap (if used)
-  * Relational DB system (MariaDB avised, any MySQL compatible system may function)
+  * Relational DB system (MariaDB advised, any MySQL compatible system may function)
 
 # Instalation instructions
 
