@@ -161,6 +161,10 @@ $(document).ready(function () {
     checkCredentials();
 
     ensoConf.addAfterViewCallback(updateInboxCount);
+    ensoConf.addAfterViewCallback(function () {
+        $("#pesquisa-desktop").val("").trigger('input');
+        $("#pesquisa-mobile").val("").trigger("input");
+    });
 
     $('.dropdown-button').dropdown({
         inDuration: 300,
@@ -174,29 +178,25 @@ $(document).ready(function () {
     }
     );
 
-var keys = {};
+    var keys = {};
 
-function isKey(key){
+    function isKey(key) {
 
-    return keys.hasOwnProperty(key);
-}
+        return keys.hasOwnProperty(key);
+    }
 
-window.onkeyup = function (e) {
-	delete keys[e.keyCode];
-}
-    
-window.onkeydown = function (e) {
-	keys[e.keyCode] = true;
+    window.onkeyup = function (e) {
+        delete keys[e.keyCode];
+    }
 
-	console.log("KEY:"+e.keyCode);
+    window.onkeydown = function (e) {
+        keys[e.keyCode] = true;
 
-        if ( ( isKey(91) || isKey(93) || isKey(224) || isKey(17) )  && ( e.keyCode == 83 || e.keyCode == 70 ))
-	{
-		console.log('DEU');
-		if ($(document.activeElement).prop('nodeName').toLowerCase() != 'input' && $(window).width() > 992) {
-        	        e.preventDefault();
-                	$("#pesquisa-desktop").focus();
-            	}
+        if ((isKey(91) || isKey(93) || isKey(224) || isKey(17)) && (e.keyCode == 83 || e.keyCode == 70)) {
+            if ($(document.activeElement).prop('nodeName').toLowerCase() != 'input' && $(window).width() > 992) {
+                e.preventDefault();
+                $("#pesquisa-desktop").focus();
+            }
         }
     }
 });

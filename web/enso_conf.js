@@ -26,8 +26,8 @@ var ensoConf = {
 		}
 	},
 
-	goToPage: function (nextPage, args = {}) {
-		newHash = "!" + nextPage;
+	goToPage: function (nextPage, args = {}, forceReload = true) {
+		newHash = "#!" + nextPage;
 
 		if (Object.keys(args).length > 0) {
 			newHash += '?';
@@ -36,7 +36,10 @@ var ensoConf = {
 			});
 		}
 
-		window.location.hash = newHash;
+		if(newHash == window.location.hash && forceReload === true)
+			$(window).trigger('hashchange');
+		else
+			window.location.hash = newHash;
 	},
 
 	parseParams: function () {

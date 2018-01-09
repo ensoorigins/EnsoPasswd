@@ -1,7 +1,7 @@
 <?php
 class EnsoShared {
 	
-	private static $ENSOSHARED_VERSION = "4.0.0";
+	private static $ENSOSHARED_VERSION = "5.0.0";
 	
 	/**
 	 * Códigos da resposta da chamada REST
@@ -29,6 +29,13 @@ class EnsoShared {
 	 * @var string
 	 */
 	public static $HASH_TYPE = "sha512";
+
+	/**
+	 * IV DIVIDER
+	 *
+	 * @var string
+	 */
+	public static $DIVIDER = ")(";
 	
 	/**
 	 * Network safe char - a char that will never be used has a encode result
@@ -43,14 +50,7 @@ class EnsoShared {
 	 *
 	 * @var string
 	 */
-	public static $CIPHER = MCRYPT_RIJNDAEL_128;
-	
-	/**
-	 * Modo de aplicar a cifra no processo de encriptação/desencriptação
-	 *
-	 * @var string
-	 */
-	public static $ENCRYPT_MODE = MCRYPT_MODE_ECB;
+	public static $CIPHER = "aes-256-cbc";
 	
 	/**
 	 * Get the current unix time stamp in seconds
@@ -85,21 +85,26 @@ class EnsoShared {
 	}
 
 	/**
-	 * Função de encriptação, na versão atual da lib é estabelecido a utilização de RIJNDAEL 128
+	 * Função de encriptação, na versão atual da lib é estabelecido a utilização de AES 265 CBC
 	 *
 	 * @param string $data
 	 *        	dados a encriptar
 	 * @param string $key
 	 *        	chave de encriptação
 	 *        	
-	 * @return string dados encriptados
+	 * @return string dados encriptados com IV, tude em Base64
 	 */
 	public static function encrypt($data, $key_str) {
-		return mcrypt_encrypt ( self::$CIPHER, $key_str, self::pad ( $data ), self::$ENCRYPT_MODE );
+		// Generate an initialization vector
+		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::$CIPHER));
+		
+		$encrypted = openssl_encrypt(self::pad($data), self::$CIPHER, $key_str, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
+
+		return EnsoShared::networkEncode($encrypted) . self::$DIVIDER . EnsoShared::networkEncode($iv);
 	}
 	
 	/**
-	 * Função de encriptação, na versão atual da lib é estabelecido a utilização de RIJNDAEL 128
+	 * Função de encriptação, na versão atual da lib é estabelecido a utilização de AES 256 CBC
 	 *
 	 * @param string $data
 	 *        	dados a desencriptar
@@ -109,28 +114,41 @@ class EnsoShared {
 	 * @return string dados desencriptados
 	 */
 	public static function decrypt($data, $key_str) {
-		$data_dec = mcrypt_decrypt ( self::$CIPHER, $key_str, $data, self::$ENCRYPT_MODE );
-		
-		$dataPad = ord ( $data_dec [strlen ( $data_dec ) - 1] );
-		
-		if ($dataPad > 0 && $dataPad <= self::$BLOCK_SIZE) {
-			return substr ( $data_dec, 0, - $dataPad );
-		}
-		return null;
+		EnsoDebug::d($data);
+		// To decrypt, split the encrypted data from our IV - our unique separator used was "::"
+		list($encrypted_data, $iv) = explode(self::$DIVIDER, $data, 2);
+		$encrypted_data = EnsoShared::networkDecode($encrypted_data);
+		$iv = EnsoShared::networkDecode($iv);
+		return self::unpad(openssl_decrypt($encrypted_data, self::$CIPHER, $key_str, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv));
 	}
 	
 	/**
-	 * Pad - creates the padding according to a cypher block size
+	 * Pad - creates the padding according to a cypher block size PKCS7
 	 *
-	 * @param
-	 *        	string
-	 *        	data data to pad
+	 * @param	string $data
+	 *        	data to pad
 	 *
 	 * @return string data already padded
 	 */
 	private static function pad($data) {
-		$pad = self::$BLOCK_SIZE - (strlen ( $data ) % self::$BLOCK_SIZE);
-		return $data . str_repeat ( chr ( $pad ), $pad );
+		$pad = self::$BLOCK_SIZE - (strlen($data) % self::$BLOCK_SIZE);
+		return $data . str_repeat(chr($pad), $pad);
+
+	}
+
+	/**
+	 * Unpad - removes the padding according to a cypher block size PKCS7
+	 *
+	 * @param  	string $data
+	 *        	data to unppad
+	 *
+	 * @return string data already padded
+	 */
+	private static function unpad($data)
+	{
+		$len = strlen($data);
+		$pad = ord($data[$len - 1]);
+		return substr($data, 0, strlen($data) - $pad);
 	}
 	
 	/**

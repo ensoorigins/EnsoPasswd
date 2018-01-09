@@ -26,7 +26,7 @@ class CredentialModel
         $values = array();
         $values[':title'] = $title;
         $values[':username'] = $username;
-        $values[':password'] = EnsoShared::networkEncode(EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey()));
+        $values[':password'] = EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey());
         $values[':description'] = $description;
         $values[':url'] = $url;
         $values[':belongsToFolder'] = $belongsTo;
@@ -54,7 +54,7 @@ class CredentialModel
         $values = array();
         $values[':title'] = $title;
         $values[':username'] = $username;
-        $values[':password'] = EnsoShared::networkEncode(EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey()));
+        $values[':password'] = EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey());
         $values[':description'] = $description;
         $values[':url'] = $url;
         $values[':idCredentials'] = $id;
@@ -116,7 +116,7 @@ class CredentialModel
 
             $row = $db->fetch();
 
-            $row['password'] = EnsoShared::networkEncode(EnsoShared::decrypt(EnsoShared::networkDecode($row['password']), self::getEncryptionKey()));
+            $row['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($row['password'], self::getEncryptionKey()));
 
             return $row;
         } catch (PDOException $e) {
