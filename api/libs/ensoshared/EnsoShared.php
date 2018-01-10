@@ -114,7 +114,6 @@ class EnsoShared {
 	 * @return string dados desencriptados
 	 */
 	public static function decrypt($data, $key_str) {
-		EnsoDebug::d($data);
 		// To decrypt, split the encrypted data from our IV - our unique separator used was "::"
 		list($encrypted_data, $iv) = explode(self::$DIVIDER, $data, 2);
 		$encrypted_data = EnsoShared::networkDecode($encrypted_data);
