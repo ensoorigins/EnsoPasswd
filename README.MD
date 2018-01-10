@@ -8,11 +8,11 @@
       * php-ldap (if used)
   * Relational DB system (MariaDB advised, any MySQL compatible system may function)
 
-# Instalation instructions
+# Installation instructions
 
 1. Extract the platform source onto the document root;
 2. Create a database for Passwd to store data on;
-2. Access the setup located at $DocumentRoot/setup/ through a browser;
+2. Access the setup located at .../setup/ through a browser;
       * Ensure the directory you specify for the encryption key location has proper permission to the user running the setup script (write required pre-setup, read-only may be set and and is in fact advised post-setup).
 3. Delete the setup folder to ensure that your settings cannot be malliciously overwritten;
 4. The platform should be successfully installed on your webserver!
@@ -39,8 +39,6 @@ For extra convinience provide an index.html at your document root redirecting to
 </html>
 ```
 
-## License Agreement
-
 ## Website
 
-Visit [Enso Origins](https://enso-origins.com/)
+Visit [Enso Origins](https://enso-origins.com/home/)
