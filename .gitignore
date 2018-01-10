@@ -2,3 +2,5 @@
 *.bak
 api/passwd.conf.php
 *composer*
+api/controllers.autoload/Test.php
+test.php
