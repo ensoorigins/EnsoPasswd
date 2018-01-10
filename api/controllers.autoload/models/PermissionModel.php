@@ -47,7 +47,6 @@ class PermissionModel
 			//retorno do valor
             return true;
         } catch (PDOException $e) {
-            EnsoDebug::var_error_log($e);
             return false;
         }
     }
