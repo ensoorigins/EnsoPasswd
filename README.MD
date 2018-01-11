@@ -19,22 +19,22 @@
 
 ## Extra notes
 
-For extra convinience provide an index.html at your document root redirecting to the ./web/ directory of your document root such as the following:
+If you have issues with the redirections, please check the index.html file at the document root, ensure it points to the ./web/ directory of your document root such as the following, as a final attempt use a fully fledged absolute URL.
 
 ```html
 <!DOCTYPE HTML>
 <html lang="en-US">
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="refresh" content="0; url=http://example.com">
+        <meta http-equiv="refresh" content="1; url=web/">
         <script type="text/javascript">
-            window.location.href = "http://example.com"
+            window.location.href = "web/"
         </script>
         <title>Page Redirection</title>
     </head>
     <body>
         <!-- Note: don't tell people to `click` the link, just tell them that it is a link. -->
-        If you are not redirected automatically, follow this <a href='http://example.com'>link to example</a>.
+        If you are not redirected automatically, follow this <a href='web/'>Passwd</a>.
     </body>
 </html>
 ```
