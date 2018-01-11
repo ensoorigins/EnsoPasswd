@@ -1,6 +1,5 @@
 .eslintrc.json
 *.bak
-api/passwd.conf.php
+src/api/passwd.conf.php
 *composer*
-api/controllers.autoload/Test.php
-test.php
+

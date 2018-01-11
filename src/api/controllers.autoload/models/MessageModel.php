@@ -183,7 +183,7 @@ class MessageModel
             $row = $db->fetch();
             
 			//retorno do valor
-            $row['password'] = EnsoShared::networkEncode(EnsoShared::decrypt(EnsoShared::networkDEcode($row['password']), CredentialModel::getEncryptionKey()));
+            $row['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($row['password'], CredentialModel::getEncryptionKey()));
             return $row;
         } catch (PDOException $e) {
             return false;
@@ -260,7 +260,7 @@ class MessageModel
             if (count($rows) < 1)
                 return false;
 
-            $rows[0]['password'] = EnsoShared::networkEncode(EnsoShared::decrypt(EnsoShared::networkDecode($rows[0]['password']), CredentialModel::getEncryptionKey()));
+            $rows[0]['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($rows[0]['password']), CredentialModel::getEncryptionKey());
             return $rows[0];
 
         } catch (PDOException $e) {
