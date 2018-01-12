@@ -78,6 +78,8 @@ class Messages {
             return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao partilhar credencial");
         }
 
+        Ensomail::sendMail($ensoMailConfig["from"], UserModel::getUser($receiver)['email'], "Notificação de Credencial", "You have received a credential on your EnsoPasswd platform.");
+
         EnsoLogsModel::addEnsoLog($authusername, "Shared credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
