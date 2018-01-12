@@ -33,9 +33,9 @@ var UserFolderView =
                     html = "<thead>\
                                 <tr>\
                                     <th colspan='2'>Name</th>\
-                                    <th>Description</th>\
-                                    <th class='created-by-pre-text'></th>\
-                                    <th colspan='3'></th>\
+                                    <th class='hide-on-med-and-down'>Description</th>\
+                                    <th class='hide-on-med-and-down created-by-pre-text'></th>\
+                                    <th colspan='3' class='hide-on-med-and-down center-align'></th>\
                                 </tr>\
                             </thead>\
                             <tbody>";
@@ -49,13 +49,13 @@ var UserFolderView =
                                     <td>\
                                         <span class='flow-text'>" + val['name'] + "</span>\
                                     </td>\
-                                    <td>\
+                                    <td class='hide-on-med-and-down' >\
                                         " + val['folderChildren'] + " <span class='folder-label'></span>; " + val['credentialChildren'] + " <span class='credential-label'></span> \
                                     </td>\
-                                    <td>\
+                                    <td class='hide-on-med-and-down' >\
                                         <p>" + val['createdById'] + "</p>\
                                     </td>\
-                                    <td colspan='3'>\
+                                    <td colspan='3' class='hide-on-med-and-down center-align'>\
                                     </td>\
                                 </tr>";
                         }
@@ -75,21 +75,21 @@ var UserFolderView =
                                     <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
                                         <span class='flow-text'>" + val['title'] + "</span>\
                                     </td>\
-                                    <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                    <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
                                         " + path + "\
                                     </td>\
-                                    <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                    <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
                                         <p>" + val['createdById'] + "</p>\
                                     </td>\
-                                    <td onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='center-align'>\
+                                    <td onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
                                         <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-user-label'></p>\
                                     </td >\
-                                    <td onclick='UserFolderView.copyPassword(" + val['idCredentials'] + ")' class='center-align'>\
+                                    <td onclick='UserFolderView.copyPassword(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
                                         <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-password-label'></p>\
                                     </td >\
-                                    <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='center-align'>\
+                                    <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
                                         <p><i class='enso-orange-text material-icons circle'>open_in_new</i></p>\
                                         <p style='font-size: 0.8em;' class='open-url-label'></p>\
                                     </td>\
