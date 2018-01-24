@@ -15,29 +15,34 @@
             </div>
         </div>
         <div class="col s10 offset-s1">
-            <form id="validation-form">
-                <div class="row">
+            
+        	<div class="row">
+		
                     <div class="input-field col s12">
+<form id="validation-form">
                         <input id="edit-name" type="text" autocomplete="nope" class="validate" required>
                         <input type='hidden' id='edit-folder-id' />
                         <label for="edit-name">Nome</label>
                         <input type="submit" id="validation" style="display: none" />
+</form>
                     </div>
+          	
                 </div>
-            </form>
-        </div>
+  
+       
 
-        <div class="row valign-wrapper" id="autocomplete-row">
+        <div class="col s12 valign-wrapper" id="autocomplete-row">
             <div class="input-field col s12" style="margin: 0px;">
                 <input type="text" id="autocomplete-input" class="autocomplete">
                 <label for="autocomplete-input" id="user-permission-add-label"></label>
             </div>
         </div>
-        <div class="divider"></div>
+            <div class="divider"></div>
         <table class="bordered" id="user-table">
             <tbody id="user-list-body">
             </tbody>
         </table>
+ </div>
     </div>
 </div>
 
