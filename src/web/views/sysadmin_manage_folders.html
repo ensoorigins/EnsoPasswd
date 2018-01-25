@@ -13,8 +13,12 @@
         <i class="large material-icons">create_new_folder</i>
     </a>
 </div>
-
-<script src="./js/FolderActions.js" type="text/javascript"></script>
-<script src="./js/modalUtils.js" type="text/javascript"></script>
-<script src="./js/sysadmin_manage_folders.js" type="text/javascript"></script>
-
+<script>
+    var scripts = [ 
+        "js/FolderActions.js",
+        "js/modalUtils.js",
+        "js/sysadmin_manage_folders.js"
+    ];
+  
+    ensoConf.ensoLoadScripts(scripts);
+</script>

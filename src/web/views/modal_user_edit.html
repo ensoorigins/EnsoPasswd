@@ -67,12 +67,17 @@
     </div>
 </div>
 
-<script src="./js/ConfirmationModal.js"></script>
-<script src="./js/UserModal.js" type="text/javascript"></script>
 <link href="./css/modal_Stuff.css" rel="stylesheet" type="text/css"/>
 
 <script>
-    LocalizationManager.applyLocaleSettingsToGivenView('user_edit_modal');
-    UserModal.enableLookMode();
-    $('.tooltipped').tooltip({delay: 50});
+    var scripts = [ 
+      "js/ConfirmationModal.js",
+      "js/UserModal.js"
+    ];
+  
+    ensoConf.ensoLoadScripts(scripts, function(){
+        LocalizationManager.applyLocaleSettingsToGivenView('user_edit_modal');
+        UserModal.enableLookMode();
+        $('.tooltipped').tooltip({delay: 50});
+    });
 </script>

@@ -36,7 +36,7 @@ var CredentialActions =
                     if (failFunction !== undefined)
                         failFunction(response);
 
-                    //switchApp(ENSO_DEFAULT_APP);
+                    //ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
 

@@ -43,5 +43,11 @@
     <tbody id="log-list-body">
     </tbody>
 </table>
-<script src="./js/LogActions.js" type="text/javascript"></script>
-<script src="./js/sysadmin_view_logs.js" type="text/javascript"></script>
+<script>
+    var scripts = [ 
+      "js/LogActions.js",
+      "js/sysadmin_view_logs.js"
+    ];
+  
+    ensoConf.ensoLoadScripts(scripts);
+</script>

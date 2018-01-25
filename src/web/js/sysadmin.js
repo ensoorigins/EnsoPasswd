@@ -59,5 +59,5 @@ function activateViewLogsTab()
 
 if (!hasAction('accessSysAdminArea'))
 {
-    switchApp(ENSO_DEFAULT_APP);
+    ensoConf.switchApp(ensoConf.defaultApp);
 }

@@ -57,7 +57,7 @@ var SysAdminFolderManagement =
                 },
                 error: function (response) {
                     dealWithErrorStatusCodes(response, FolderActions.errors);
-                    //switchApp(ENSO_DEFAULT_APP);
+                    //ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         },
@@ -82,7 +82,7 @@ var SysAdminFolderManagement =
                     });
                 },
                 error: function (response) {
-                    //switchApp(ENSO_DEFAULT_APP);
+                    //ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         },
@@ -101,7 +101,7 @@ var SysAdminFolderManagement =
                     FolderModal.enableEditMode();
                 },
                 error: function (response) {
-                    switchApp(ENSO_DEFAULT_APP);
+                    ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         },
@@ -147,7 +147,7 @@ var SysAdminFolderManagement =
     };
 
 if (!hasAction('seeFolderContents')) {
-    switchApp(ENSO_DEFAULT_APP);
+    ensoConf.switchApp(ensoConf.defaultApp);
 }
 
 SysAdminFolderManagement.initModals();

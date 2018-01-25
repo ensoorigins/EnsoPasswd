@@ -47,9 +47,15 @@
         </li>
     </ul>
 </div>
-<script src="./js/modalUtils.js" type="text/javascript"></script>
-<script src="./js/FolderActions.js" type="text/javascript"></script>
-<script src="./js/PasswordUtil.js" type="text/javascript"></script>
-<script src="./js/folders.js" type="text/javascript"></script>
-<script src="./js/CredentialActions.js" type="text/javascript"></script>
-<script src="./js/ShareModal.js" type="text/javascript"></script>
+<script>
+    var scripts = [ 
+      "js/modalUtils.js",
+      "js/FolderActions.js",
+      "js/PasswordUtil.js",
+      "js/folders.js",
+      "js/CredentialActions.js",
+      "js/ShareModal.js"
+    ];
+  
+    ensoConf.ensoLoadScripts(scripts);
+</script>

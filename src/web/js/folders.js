@@ -277,7 +277,7 @@ var UserFolderView =
                     });
                 },
                 error: function (response) {
-                    switchApp(ENSO_DEFAULT_APP);
+                    ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         },
@@ -294,7 +294,7 @@ var UserFolderView =
                     $('#folder-modal').modal('open');
                 },
                 error: function (response) {
-                    switchApp(ENSO_DEFAULT_APP);
+                    ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         },

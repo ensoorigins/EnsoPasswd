@@ -134,7 +134,7 @@ var FolderModal =
 
 
 
-                    //switchApp(ENSO_DEFAULT_APP);
+                    //ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         }

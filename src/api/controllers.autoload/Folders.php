@@ -516,12 +516,14 @@ class Folders
             EnsoLogsModel::addEnsoLog($authusername, "Tried to remove permissions from folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
             return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissões não limpas");
         }
+        EnsoDebug::var_error_log($permissions);
+        if($permissions != NULL){
+            foreach ($permissions as $userId => $hasAdmin) {
 
-        foreach ($permissions as $userId => $hasAdmin) {
-
-            if (PermissionModel::addNewPermission($id, $hasAdmin, $userId) === false) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to add permissions to folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissão não criada");
+                if (PermissionModel::addNewPermission($id, $hasAdmin, $userId) === false) {
+                    EnsoLogsModel::addEnsoLog($authusername, "Tried to add permissions to folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
+                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissão não criada");
+                }
             }
         }
 

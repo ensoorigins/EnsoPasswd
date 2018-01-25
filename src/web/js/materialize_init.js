@@ -66,7 +66,7 @@ function checkCredentials() {
     }
     else {
         if (ensoConf.getCurrentPage() == "login")
-            switchApp(ensoConf.defaultApp);
+            ensoConf.switchApp(ensoConf.defaultApp);
         else
             adaptUIToUser();
     }

@@ -116,10 +116,16 @@
     </div>
 </div>
 
-<script src="js/ExternalMessageActions.js" type="text/javascript"></script>
-<script src="js/modal_folders_edit_credential.js"></script>
 <link href="./css/modal_Stuff.css" rel="stylesheet" type="text/css" />
+
 <script>
+    var scripts = [ 
+      "js/ExternalMessageActions.js",
+      "js/modal_folders_edit_credential.js"
+    ];
+  
+    ensoConf.ensoLoadScripts(scripts);
+
     $("#share-modal").on('mousedown', function (event) {
 
         shown = false;

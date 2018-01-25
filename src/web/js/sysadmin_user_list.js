@@ -40,7 +40,7 @@ var SysAdminUserManagement = {
                 });
             },
             error: function (response) {
-                //switchApp(ENSO_DEFAULT_APP);
+                //ensoConf.switchApp(ensoConf.defaultApp);
             }
         });
         //launchmodal
@@ -59,7 +59,7 @@ var SysAdminUserManagement = {
                 $('.modal').empty().append(response);
             },
             error: function (response) {
-                switchApp(ENSO_DEFAULT_APP);
+                ensoConf.switchApp(ensoConf.defaultApp);
             }
         });
         //launchmodal
@@ -119,7 +119,7 @@ var SysAdminUserManagement = {
 
 if (!hasAction('listUsers') || !hasAction('manageUsers'))
 {
-    switchApp(ENSO_DEFAULT_APP);
+    ensoConf.switchApp(ensoConf.defaultApp);
 }
 
 SysAdminUserManagement.initModals();
