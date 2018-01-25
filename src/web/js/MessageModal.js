@@ -24,7 +24,7 @@ var MessageModal = {
                                     $('#' + divToHide).show();
 
                                 $("#message-modal").remove();
-                                Moda//user pressed ctrl+flUtils.refreshTooltips();
+                                ModalUtils.refreshTooltips();
                             }
                         });
 
