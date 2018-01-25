@@ -3,5 +3,7 @@
       "js/sysadmin.js"
     ];
   
-    ensoConf.ensoLoadScripts(scripts);
+    ensoConf.ensoLoadScripts(scripts, function(){
+      checkTabs();
+    });
 </script>

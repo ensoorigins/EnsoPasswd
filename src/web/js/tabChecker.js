@@ -26,9 +26,3 @@ function checkTabs()
        $('.nav-content').empty();
     }
 }
-
-$(document).ready(function () {
-
-ensoConf.addAfterViewCallback(checkTabs);
-
-});
