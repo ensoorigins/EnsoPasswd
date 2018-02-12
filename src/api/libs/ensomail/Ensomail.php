@@ -6,6 +6,14 @@ class Ensomail {
 	public static function sendMail($fromMail, $toMail, $subject, $message){
 		
 		global $ensoMailConfig;
+
+		if(empty($ensoMailConfig))
+			return false;
+
+		foreach($ensoMailConfig as $param)
+			if(empty($param))
+				return false;
+
 		
 		// Create the Transport
 		$transport = (new Swift_SmtpTransport($ensoMailConfig['host'], $ensoMailConfig['port'], $ensoMailConfig['encryption']))

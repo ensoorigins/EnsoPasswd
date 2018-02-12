@@ -5,7 +5,7 @@ $ensoMailConfig['host'] = $_POST['emailhost'];
 $ensoMailConfig['port'] = $_POST['emailport'];
 $ensoMailConfig['user'] = $_POST['emailuser'];
 $ensoMailConfig['pass'] = $_POST['emailpass'];
-$ensoMailConfig["encryption"] = null;
+$ensoMailConfig["encryption"] = $_POST['emailSecurity'];;
 
 function testEmail()
 {

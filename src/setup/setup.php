@@ -34,32 +34,33 @@ $emailPort = $_POST["emailport"];
 $emailFrom = $_POST["emailfrom"];
 $emailUser = $_POST["emailuser"];
 $emailPass = $_POST["emailpass"];
+$emailSecurity = $_POST['emailSecurity'];
 
 $keyLocation = $_POST["keylocation"];
 
-if($keyLocation[strlen($keyLocation) - 1] != '/')
+if ($keyLocation[strlen($keyLocation) - 1] != '/')
     $keyLocation .= "/";
 
 /* Verificar Validade de Dados */
 
-if ( ($user == "" || $password == "" || $email == "") ||
-    ($emailFrom == "" || $emailHost == "" || $emailPass == "" || $emailPort == "" || $emailUser == "") ||
-        !( ($ldapHost == "" && $ldapMainDn == "" && $ldapPort == "" && $ldapQuery == "" && $ldapTimeout == "" && $ldapTestUser == "" && $ldapTestPass == "") || ($ldapHost != "" && $ldapMainDn != "" && $ldapPort != "" && $ldapQuery != "" && $ldapTimeout != "" && $ldapTestUser != "" && $ldapTestPass != "")) || $keyLocation == "") {
+if (($user == "" || $password == "" || $email == "") || 
+    !(($emailFrom != "" && $emailHost != "" && $emailPass != "" && $emailPort != "" && $emailUser != "") || ($emailFrom == "" && $emailHost == "" && $emailPass == "" && $emailPort == "" && $emailUser == "")) ||
+    !(($ldapHost == "" && $ldapMainDn == "" && $ldapPort == "" && $ldapQuery == "" && $ldapTimeout == "" && $ldapTestUser == "" && $ldapTestPass == "") || ($ldapHost != "" && $ldapMainDn != "" && $ldapPort != "" && $ldapQuery != "" && $ldapTimeout != "" && $ldapTestUser != "" && $ldapTestPass != "")) || $keyLocation == "") {
     http_response_code(406);
     echo "Not all required fields were sent.";
 } else {
 
     /* check all */
 
-    if (test_db() === FALSE) {
+    if (test_db() === false) {
         echo "bad db settings";
         http_response_code(406);
         return;
-    } else if (testEmail() === FALSE) {
+    } else if (!($emailHost == "" && $emailFrom == "" && $emailPass == "" && $emailPort == "" && $emailUser == "") && testEmail() === false) {
         echo "bad email settings";
         http_response_code(406);
         return;
-    } else if (! ($ldapHost == "" && $ldapMainDn == "" && $ldapPort == "" && $ldapQuery == "" && $ldapTimeout == "") && testLdap() == FALSE) {
+    } else if (!($ldapHost == "" && $ldapMainDn == "" && $ldapPort == "" && $ldapQuery == "" && $ldapTimeout == "") && testLdap() == false) {
         echo "bad ldap settings";
         http_response_code(406);
         return;
@@ -73,21 +74,6 @@ if ( ($user == "" || $password == "" || $email == "") ||
         http_response_code(406);
         return;
     }
-
-    /* Set up DB */
-
-    $db = new PDO(
-        "mysql" . ":host=" . $dbHost . ";port=" . $dbPort . ";dbname=" . $dbName,
-        $dbUser,
-        $dbPass
-    );
-
-    $myfile = fopen("./setup.sql", "r") or die("Unable to open setup sql script");
-    $sql = fread($myfile, filesize("./setup.sql"));
-    fclose($myfile);
-    $query = $db->prepare($sql);
-    $query->execute();
-    $query->closeCursor();
 
     /* Define settings */
 
@@ -104,11 +90,11 @@ if ( ($user == "" || $password == "" || $email == "") ||
     /* Notification Settings */
     
     $ensoMailConfig["host"] = "' . $emailHost . '";
-    $ensoMailConfig["port"] = ' . $emailPort . ';
+    $ensoMailConfig["port"] = "' . $emailPort . '";
     $ensoMailConfig["user"] = "' . $emailUser . '";
     $ensoMailConfig["pass"] = "' . $emailPass . '";
     $ensoMailConfig["from"] = "' . $emailFrom . '";
-    $ensoMailConfig["encryption"] = null; // tls || ssl || null
+    $ensoMailConfig["encryption"] = ' . ($emailSecurity == "null" ? "NULL" : '"' . $emailSecurity . '"') . '; // tls || ssl || null
     
     /* Database Settings */
     
@@ -134,12 +120,26 @@ if ( ($user == "" || $password == "" || $email == "") ||
 
     $key = EnsoShared::generateSecret(32);
 
-    if(is_writable($keyLocation))
-    {
+    if (is_writable($keyLocation)) {
         $myfile = fopen($keyLocation . "encryption.key", "w") or die("Unable to create encription key file");
         fwrite($myfile, $key, strlen($key));
         fclose($myfile);
     }
+
+        /* Set up DB */
+
+    $db = new PDO(
+        "mysql" . ":host=" . $dbHost . ";port=" . $dbPort . ";dbname=" . $dbName,
+        $dbUser,
+        $dbPass
+    );
+
+    $myfile = fopen("./setup.sql", "r") or die("Unable to open setup sql script");
+    $sql = fread($myfile, filesize("./setup.sql"));
+    fclose($myfile);
+    $query = $db->prepare($sql);
+    $query->execute();
+    $query->closeCursor();
     
     /* Add first admin user */
 

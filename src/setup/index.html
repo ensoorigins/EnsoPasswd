@@ -12,9 +12,7 @@
     <script src="../web/js/external/materialize.js" type="text/javascript"></script>
     <script src="index.js" type="text/javascript"></script>
     <link rel="stylesheet" href="custom.css">
-
 </head>
-
 
 <body>
     <div class="navbar-fixed" id='header'>
@@ -29,48 +27,56 @@
         </nav>
     </div>
     <div id="loader" class="center-align" style="width: 100%; margin-top: 2em;">
-    <div class="preloader-wrapper big active">
-        <div class="spinner-layer spinner-blue">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
+        <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-red">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-yellow">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+
+            <div class="spinner-layer spinner-green">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
         </div>
-  
-        <div class="spinner-layer spinner-red">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
-        </div>
-  
-        <div class="spinner-layer spinner-yellow">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
-        </div>
-  
-        <div class="spinner-layer spinner-green">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
-        </div>
-      </div>
-      </div>
+    </div>
     <div class="container" id="main-content">
         <div class="row">
             <h4>Tell us a bit about your database:</h4>
@@ -153,27 +159,35 @@
                 <a class="waves-effect waves-light btn right" onclick="testLDAP()" style="margin-right: 1em">
                     <i class="material-icons left">refresh</i>Test LDAP settings</a>
             </div>
-            <h4 style="clear:both">Email settings</h4>
+            <h4 style="clear:both">Email settings (leave all blank to ignore this)</h4>
             <div class="divider" style="margin-bottom: 1em"></div>
             <div class="input-field col s12">
-                <input placeholder="smtp.test.com" id="edit-emailhost" type="text" autocomplete="nope" class="validate invalid" required>
+                <input placeholder="smtp.test.com" id="edit-emailhost" type="text" autocomplete="nope" class="validate" >
                 <label for="edit-emailhost" id="emailhost-label">Host</label>
             </div>
             <div class="input-field col s12">
-                <input placeholder="25" id="edit-emailport" type="number" autocomplete="nope" class="validate invalid" required>
+                <input placeholder="25" id="edit-emailport" type="number" autocomplete="nope" class="validate" >
                 <label for="edit-emailport" id="emailport-label">Port</label>
             </div>
             <div class="input-field col s12">
-                <input placeholder="no-reply@test.com" id="edit-emailfrom" type="email" autocomplete="nope" class="validate invalid" required>
+                <input placeholder="no-reply@test.com" id="edit-emailfrom" type="email" autocomplete="nope" class="validate" >
                 <label for="edit-emailfrom" id="emailfrom-label">Send email from</label>
             </div>
             <div class="input-field col s12">
-                <input placeholder="actual.user.that@will.send.email.com" id="edit-emailuser" type="text" autocomplete="nope" class="validate invalid" required>
+                <input placeholder="actual.user.that@will.send.email.com" id="edit-emailuser" type="text" autocomplete="nope" class="validate">
                 <label for="edit-emailuser" id="emailuser-label">User to authenticate</label>
             </div>
-            <div class="input-field col s12">
-                <input id="edit-emailpass" type="password" autocomplete="nope" class="validate invalid" required>
+            <div class="input-field col s6">
+                <input id="edit-emailpass" type="password" autocomplete="nope" class="validate" >
                 <label for="edit-emailuser" id="emailpassword-label">Password to authenticate</label>
+            </div>
+            <div class="input-field col s6">
+                <select id='email-security'>
+                    <option value="null" selected>None</option>
+                    <option value="ssl">SSL</option>
+                    <option value="tls">TLS</option>
+                </select>
+                <label>Authentication Security</label>
             </div>
             <div class="input-field col s6">
                 <input id="edit-emailto" type="email" autocomplete="nope" class="validate">
@@ -186,7 +200,7 @@
             <h4 style="clear:both">Encryption key location</h4>
             <div class="divider" style="margin-bottom: 1em"></div>
             <div class="input-field col s6">
-                <input id="edit-keylocation" placeholder="~/passwd.d/" type="text" autocomplete="nope" class="validate" required>
+                <input id="edit-keylocation" placeholder="~/passwd.d/" type="text" autocomplete="nope" class="validate invalid" required>
                 <label for="edit-keylocation" id="keylocation-label">Encryption key location</label>
             </div>
             <div class="col s6">
@@ -204,6 +218,10 @@
 
         </div>
     </div>
+
+    <script>
+        $('select').material_select();
+    </script>
 </body>
 
 </html>

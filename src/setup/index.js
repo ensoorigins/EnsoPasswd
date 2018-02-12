@@ -12,6 +12,7 @@ function testEmail()
             emailpass: $("#edit-emailpass").val(),
             emailto: $("#edit-emailto").val(),
             emailfrom: $("#edit-emailfrom").val(),
+            emailSecurity: $("#email-security").val(),
             test: 1
         },
         success: function (response) {
@@ -111,6 +112,7 @@ function callSetupScript()
             emailpass: $("#edit-emailpass").val(),
             emailto: $("#edit-emailto").val(),
             emailfrom: $("#edit-emailfrom").val(),
+            emailSecurity: $("#email-security").val(),
             username: $("#edit-username").val(),
             password: $("#edit-password").val(),
             email: $("#edit-email").val(),
