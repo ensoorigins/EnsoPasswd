@@ -1,7 +1,7 @@
 <?php
 class Ensomail {
 	
-	private static $ENSO_MAIL_VERSION = "2.0.0";
+	private static $ENSO_MAIL_VERSION = "2.0.1";
 	
 	public static function sendMail($fromMail, $toMail, $subject, $message){
 		
@@ -10,8 +10,8 @@ class Ensomail {
 		if(empty($ensoMailConfig))
 			return false;
 
-		foreach($ensoMailConfig as $param)
-			if(empty($param))
+		foreach($ensoMailConfig as $name =>$param)
+			if(empty($param) && $name != "encryption")
 				return false;
 
 		

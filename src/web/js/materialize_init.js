@@ -190,6 +190,9 @@ $(document).ready(function () {
     }
 
     window.onkeydown = function (e) {
+        if($(".modal.open").length !== 0)
+            return;
+            
         keys[e.keyCode] = true;
 
         if ((isKey(91) || isKey(93) || isKey(224) || isKey(17)) && (e.keyCode == 83 || e.keyCode == 70)) {
