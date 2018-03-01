@@ -1,7 +1,7 @@
 var LanguageModal = {
     show: function ()
     {
-        pageUrl = ensoConf.viewsPath + "language_modal.html";
+        var pageUrl =ensoConf.viewsPath + "language_modal.html";
         $.ajax({
             type: "GET",
             dataType: "html",
@@ -26,7 +26,7 @@ var LanguageModal = {
 
                 //fill language options
                 
-                html = "<div class='row'><form>";
+                var html = "<div class='row'><form>";
                 
                 $.each(LocalizationManager.availableLanguages, function(key, val)
                 {

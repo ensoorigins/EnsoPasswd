@@ -2,7 +2,7 @@ var ModalUtils =
         {
             coverNavbar: function ()
             {
-                lowestZ = 9999;
+                var lowestZ = 9999;
 
                 $(".modal-overlay").each(function () {
                     
@@ -14,7 +14,7 @@ var ModalUtils =
             },
             modalIsValid : function()
             {
-                isValid = true;
+                var isValid = true;
                 
                 $("#validation-form").find(".validate").each(function() {
                     if($(this).hasClass("invalid"))

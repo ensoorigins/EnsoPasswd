@@ -1,6 +1,6 @@
 var MessageActions = {
     getInbox: function (successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "inbox/";
+        var pageUrl = REST_SERVER_PATH + "inbox/";
 
         $.ajax({
             type: "GET",
@@ -25,7 +25,7 @@ var MessageActions = {
         });
     },
     getOutbox: function (successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "outbox/";
+        var pageUrl = REST_SERVER_PATH + "outbox/";
 
         $.ajax({
             type: "GET",
@@ -50,7 +50,7 @@ var MessageActions = {
     },
 
     shareExisting: function (receiver, credential, message, timeToDie, successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "share/";
+        var pageUrl = REST_SERVER_PATH + "share/";
 
         $.ajax({
             type: "POST",
@@ -81,7 +81,7 @@ var MessageActions = {
     shareNew: function (title, username, password, description, url, receiver, message, timeToDie, successFunction = undefined, failFunction = undefined) {
         password = EnsoShared.networkEncode(password);
 
-        pageUrl = REST_SERVER_PATH + "share/";
+        var pageUrl = REST_SERVER_PATH + "share/";
 
         $.ajax({
             type: "POST",
@@ -114,7 +114,7 @@ var MessageActions = {
     },
 
     getMessage: function (messageId, successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "message/";
+        var pageUrl = REST_SERVER_PATH + "message/";
 
         $.ajax({
             type: "GET",
@@ -127,7 +127,7 @@ var MessageActions = {
             },
             url: pageUrl,
             success: function (response) {
-                response['password'] = EnsoShared.networkDecode(response['password']);
+                response['password'] = EnsoShared.netwoletrkDecode(response['password']);
 
                 if (successFunction !== undefined)
                     successFunction(response);
@@ -145,25 +145,23 @@ var MessageActions = {
     receiveCredential: function (messageId, title, username, password, description, url, belongsTo, successFunction = undefined, failFunction = undefined) {
         password = EnsoShared.networkEncode(password);
 
-        dataArray = {
-            title: title,
-            username: username,
-            password: password,
-            description: description,
-            url: url,
-            belongsTo: belongsTo,
-            messageId: messageId,
-            authusername: Cookies.get('username'),
-            sessionkey: Cookies.get('sessionkey')
-        };
-
-        pageUrl = REST_SERVER_PATH + "message/";
+        var pageUrl = REST_SERVER_PATH + "message/";
 
         $.ajax({
             type: "POST",
             dataType: "json",
             cache: false,
-            data: dataArray,
+            data: {
+                title: title,
+                username: username,
+                password: password,
+                description: description,
+                url: url,
+                belongsTo: belongsTo,
+                messageId: messageId,
+                authusername: Cookies.get('username'),
+                sessionkey: Cookies.get('sessionkey')
+            },
             url: pageUrl,
             success: function (response) {
 
@@ -179,7 +177,7 @@ var MessageActions = {
         });
     },
     removeMessage: function (messageId, successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "message/";
+        var pageUrl = REST_SERVER_PATH + "message/";
 
         $.ajax({
             type: "DELETE",
@@ -204,7 +202,7 @@ var MessageActions = {
         });
     },
     getInboxCount: function (successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "inboxCount/";
+        var pageUrl = REST_SERVER_PATH + "inboxCount/";
 
         $.ajax({
             type: "GET",

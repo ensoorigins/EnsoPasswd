@@ -4,7 +4,7 @@ var ExternalLink = {
             url = window.location.href;
         name = name.replace(/[\[\]]/g, "\\$&");
         var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
+            results = regex.exec(url);
         if (!results)
             return null;
         if (!results[2])
@@ -12,19 +12,16 @@ var ExternalLink = {
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     },
 
-    load: function ()
-    {       
+    load: function () {
         LocalizationManager.applyLocaleSettingsToGivenView('message_modal');
         LocalizationManager.applyLocaleSettingsToGivenView('share_modal');
 
 
-        externalKey = ExternalLink.getParameterByName('externalKey');
+        var externalKey = ExternalLink.getParameterByName('externalKey');
 
-        if (externalKey == '' || externalKey == null)
-        {
+        if (externalKey == '' || externalKey == null) {
             ExternalLink.externalMessageNotFound();
-        } else
-        {
+        } else {
 
             ExternalMessageActions.getExternalMessage(externalKey, function (message) {
                 $("#edit-title").val(message['title']);
@@ -38,14 +35,13 @@ var ExternalLink = {
 
                 Materialize.updateTextFields();
             },
-                    function () {
-                        ExternalLink.externalMessageNotFound();
-                    });
+                function () {
+                    ExternalLink.externalMessageNotFound();
+                });
         }
     },
 
-    externalMessageNotFound: function ()
-    {
+    externalMessageNotFound: function () {
         $("#validation-form").remove();
         $("#intro-text").empty().text(LocalizationManager.getStringFromView('external_link', 'external-not-found'));
     }

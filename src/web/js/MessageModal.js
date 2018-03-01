@@ -1,7 +1,6 @@
 var MessageModal = {
-    show: function (external, viewOnly, messageId, divToHide = undefined)
-    {
-        pageUrl = ensoConf.viewsPath + "message_modal.html";
+    show: function (external, viewOnly, messageId, divToHide = undefined) {
+        var pageUrl = ensoConf.viewsPath + "message_modal.html";
         $.ajax({
             type: "GET",
             dataType: "html",
@@ -15,26 +14,23 @@ var MessageModal = {
                 $(".tooltipped").tooltip();
 
                 $("#message-modal").modal(
-                        {
-                            endingTop: '20%',
-                            ready: ModalUtils.coverNavbar,
-                            complete: function ()
-                            {
-                                if (divToHide !== undefined)
-                                    $('#' + divToHide).show();
+                    {
+                        endingTop: '20%',
+                        ready: ModalUtils.coverNavbar,
+                        complete: function () {
+                            if (divToHide !== undefined)
+                                $('#' + divToHide).show();
 
-                                $("#message-modal").remove();
-                                ModalUtils.refreshTooltips();
-                            }
-                        });
+                            $("#message-modal").remove();
+                            ModalUtils.refreshTooltips();
+                        }
+                    });
 
                 if (divToHide !== undefined)
                     $('#' + divToHide).hide();
 
-                if (external === true)
-                {
-                    ExternalMessageActions.getExternalMessage($.md5(messageId), function (message)
-                    {
+                if (external === true) {
+                    ExternalMessageActions.getExternalMessage(EnsoShared.hash(messageId), function (message) {
                         $("#edit-title").val(message['title']);
                         $("#edit-username").val(message['username']);
                         $("#edit-password").val(message['password']);
@@ -42,13 +38,11 @@ var MessageModal = {
                         $("#edit-url").val(message['url']);
                         $("#edit-message").val(message['message']);
                         $("#edit-message-id").val(message['idMessages']);
-                        
+
                         Materialize.updateTextFields();
                     });
-                } else
-                {
-                    MessageActions.getMessage(messageId, function (message)
-                    {
+                } else {
+                    MessageActions.getMessage(messageId, function (message) {
                         $("#edit-title").val(message['title']);
                         $("#edit-username").val(message['username']);
                         $("#edit-password").val(message['password']);
@@ -56,13 +50,12 @@ var MessageModal = {
                         $("#edit-url").val(message['url']);
                         $("#edit-message").val(message['message']);
                         $("#edit-message-id").val(message['idMessages']);
-                        
+
                         Materialize.updateTextFields();
                     });
                 }
 
-                if (viewOnly === true)
-                {
+                if (viewOnly === true) {
                     $("#edit-title").attr("disabled", true);
                     $("#edit-username").attr("disabled", true);
                     $("#edit-password").attr("disabled", true);
@@ -70,15 +63,13 @@ var MessageModal = {
                     $("#edit-url").attr("disabled", true);
                     $("#edit-message").attr("disabled", true);
                     $("#edit-message-id").attr("disabled", true);
-                    
+
                     $("#edit-generate-password").remove();
                     $("#edit-tree-search").parent().parent().remove();
                     $("#message-modal-save-button").remove();
-                } else
-                {
+                } else {
                     MessageModal.showTreeView();
-                    $("#edit-tree-search").on('input', function ()
-                    {
+                    $("#edit-tree-search").on('input', function () {
                         MessageModal.showTreeView();
                     });
                 }
@@ -91,34 +82,30 @@ var MessageModal = {
             }
         });
     },
-    showTreeView: function ()
-    {
-        pageUrl = REST_SERVER_PATH + "folderTreeView/";
+    showTreeView: function () {
+        var pageUrl = REST_SERVER_PATH + "folderTreeView/";
 
         $.ajax({
             type: "GET",
             dataType: "json",
             cache: false,
             url: pageUrl,
-            data: {sessionkey: Cookies.get('sessionkey'), authusername: Cookies.get('username')},
+            data: { sessionkey: Cookies.get('sessionkey'), authusername: Cookies.get('username') },
             success: function (response) {
 
-                if ($('input[name=folder]:checked').length === 1)
-                {
+                if ($('input[name=folder]:checked').length === 1) {
                     MessageModal.selectedFolder = $('input[name=folder]:checked').val();
                 }
 
                 $("#tree-view").empty();
-                search = $("#edit-tree-search").val().toLowerCase();
+                var search = $("#edit-tree-search").val().toLowerCase();
 
                 MessageModal.tree = response;
 
-                level = 0;
+                var level = 0;
 
-                $.each(response, function (ind, val)
-                {
-                    if (search === "" || val['name'].toLowerCase().indexOf(search) !== -1 || MessageModal.folderContainsFolder(val, search))
-                    {
+                $.each(response, function (ind, val) {
+                    if (search === "" || val['name'].toLowerCase().indexOf(search) !== -1 || MessageModal.folderContainsFolder(val, search)) {
                         $("#tree-view").append("<div id='folder-container-" + val['id'] + "'><div style='padding-left: " + (level + 1) + "em; text-align:left' >\
                                                             <input class='with-gap' name='folder' type='radio' value='" + val['id'] + "' id='folder-" + val['id'] + "' />\
                                                             <label class='enso-main-color-text' for='folder-" + val['id'] + "'>\
@@ -141,13 +128,10 @@ var MessageModal = {
             }
         });
     },
-    generateHtmlForFolder: function (folderObject, level, search)
-    {
-        $.each(folderObject['childFolders'], function (ind, val)
-        {
+    generateHtmlForFolder: function (folderObject, level, search) {
+        $.each(folderObject['childFolders'], function (ind, val) {
 
-            if (search === "" || val['name'].toLowerCase().indexOf(search) !== -1 || MessageModal.folderContainsFolder(val, search))
-            {
+            if (search === "" || val['name'].toLowerCase().indexOf(search) !== -1 || MessageModal.folderContainsFolder(val, search)) {
                 $("#folder-container-" + folderObject['id']).append("<div id='folder-container-" + val['id'] + "'><div style='padding-left: " + (level + 1) + "em; text-align:left' >\
                                                             <input class='with-gap' name='folder' type='radio' value='" + val['id'] + "' id='folder-" + val['id'] + "' />\
                                                             <label class='enso-main-color-text' for='folder-" + val['id'] + "'>\
@@ -164,22 +148,17 @@ var MessageModal = {
 
     },
 
-    folderContainsFolder: function (parent, search)
-    {
+    folderContainsFolder: function (parent, search) {
         if (parent === null)
             parent = MessageModal.tree;
 
-        sai = false;
+        var sai = false;
 
-        $.each(parent['childFolders'], function (ind, val)
-        {
-            if (sai === false)
-            {
-                if (val['name'].toLowerCase().indexOf(search) !== -1)
-                {
+        $.each(parent['childFolders'], function (ind, val) {
+            if (sai === false) {
+                if (val['name'].toLowerCase().indexOf(search) !== -1) {
                     sai = true;
-                } else
-                {
+                } else {
                     if (MessageModal.folderContainsFolder(val, search))
                         sai = true;
                 }
@@ -188,40 +167,35 @@ var MessageModal = {
 
         return sai;
     },
-    toggleFolder: function (id)
-    {
+    toggleFolder: function (id) {
         if ($("#folder-" + id).children("p").children(".drop-button").text() == "keyboard_arrow_down")
             $("#folder-" + id).children("p").children(".drop-button").text('keyboard_arrow_right');
         else
             $("#folder-" + id).children("p").children(".drop-button").text('keyboard_arrow_down');
 
-        $.each($("#folder-" + id).children(), function (ind, ele)
-        {
+        $.each($("#folder-" + id).children(), function (ind, ele) {
             if (!$(ele).is("p"))
                 $(ele).toggleClass("hiddendiv");
         });
 
     },
-    createCredential: function ()
-    {
+    createCredential: function () {
         if (ModalUtils.modalIsValid())
             MessageActions.receiveCredential(
-                    $("#edit-message-id").val(),
-                    $("#edit-title").val(),
-                    $("#edit-username").val(),
-                    $("#edit-password").val(),
-                    $("#edit-description").val(),
-                    $("#edit-url").val(),
-                    MessageModal.selectedFolder = $('input[name=folder]:checked').val(),
-                    function () {
-                        $('#message-modal').modal('close');
-                    }
+                $("#edit-message-id").val(),
+                $("#edit-title").val(),
+                $("#edit-username").val(),
+                $("#edit-password").val(),
+                $("#edit-description").val(),
+                $("#edit-url").val(),
+                MessageModal.selectedFolder = $('input[name=folder]:checked').val(),
+                function () {
+                    $('#message-modal').modal('close');
+                }
             );
     },
-    removeMessage: function ()
-    {
-        MessageActions.removeMessage($("#edit-message-id").val(), function ()
-        {
+    removeMessage: function () {
+        MessageActions.removeMessage($("#edit-message-id").val(), function () {
             $('#message-modal').modal('close');
         });
     },

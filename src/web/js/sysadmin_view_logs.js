@@ -32,7 +32,7 @@ var SysAdminLogView =
                         $("#severity-select").append("<option value='" + val + "' >" + LocalizationManager.getEnumFromView(ensoConf.getCurrentPage(), 'severityStrings')[val] + "</option>")
                     });
 
-                    names = new Object();
+                    var names = new Object();
 
                     $.each(filters['users'], function (key, val)
                     {
@@ -58,10 +58,10 @@ var SysAdminLogView =
                 
                 InfiniteScroller.init(function () {
 
-                    startTime = new Date($("#filter-from").val()).getTime() / 1000;
+                    var startTime = new Date($("#filter-from").val()).getTime() / 1000;
                     startTime = (isNaN(startTime) ? '' : startTime);
 
-                    endTime = new Date($("#filter-to").val()).getTime() / 1000;
+                    var endTime = new Date($("#filter-to").val()).getTime() / 1000;
                     endTime = (isNaN(endTime) ? '' : endTime);
 
                     LogActions.getLogs(

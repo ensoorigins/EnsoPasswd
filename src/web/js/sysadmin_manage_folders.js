@@ -1,7 +1,7 @@
 var SysAdminFolderManagement =
     {
         loadFolderList: function () {
-            pageUrl = REST_SERVER_PATH + "sysadmin/folders/";
+            var pageUrl =REST_SERVER_PATH + "sysadmin/folders/";
 
             $("#root-folder-list").empty();
             $("#list-view").empty();
@@ -16,7 +16,7 @@ var SysAdminFolderManagement =
                 },
                 url: pageUrl,
                 success: function (response) {
-                    html = "<thead>\
+                    var html = "<thead>\
                                 <tr>\
                                     <th colspan='2'>Name</th>\
                                     <th>Description</th>\
@@ -64,7 +64,7 @@ var SysAdminFolderManagement =
         launchFolderEditModal: function (id) {
             //prepare modal html
 
-            pageUrl = ensoConf.viewsPath + "modal_root_folder_edit.html";
+            var pageUrl =ensoConf.viewsPath + "modal_root_folder_edit.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -87,7 +87,7 @@ var SysAdminFolderManagement =
             });
         },
         launchFolderAddModal: function () {
-            pageUrl = ensoConf.viewsPath + "modal_root_folder_add.html";
+            var pageUrl =ensoConf.viewsPath + "modal_root_folder_add.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",

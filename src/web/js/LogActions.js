@@ -2,7 +2,7 @@ var LogActions =
         {
             getFilterInfo: function (successFunction = undefined, failFunction = undefined)
             {
-                pageUrl = REST_SERVER_PATH + "logFilters/";
+                var pageUrl =REST_SERVER_PATH + "logFilters/";
                 $.ajax({
                     type: "GET",
                     dataType: "json",
@@ -25,7 +25,7 @@ var LogActions =
 
             getLogs: function (startIndex, advance, startTime, endTime, facility, severity, userSearch, searchString, successFunction, failFunction = undefined)
             {
-                pageUrl = REST_SERVER_PATH + "logs/";
+                var pageUrl =REST_SERVER_PATH + "logs/";
                 $.ajax({
                     type: "GET",
                     dataType: "json",

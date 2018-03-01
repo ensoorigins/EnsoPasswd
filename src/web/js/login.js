@@ -1,11 +1,10 @@
-function performLogin()
-{
-    pageUrl = REST_SERVER_PATH + "auth/";
+function performLogin() {
+    var pageUrl = REST_SERVER_PATH + "auth/";
     $.ajax({
         type: "GET",
         dataType: "json",
         cache: false,
-        data: {username: $("#edit-username-login").val(), password: $("#edit-password-login").val()},
+        data: { username: $("#edit-username-login").val(), password: $("#edit-password-login").val() },
         url: pageUrl,
         success: function (response) {
             loginInvalid = false;
@@ -19,22 +18,21 @@ function performLogin()
     });
 }
 
-function validateSession()
-{
-valid= false;
+function validateSession() {
+    var valid = false;
 
-    pageUrl = REST_SERVER_PATH + "validity/";
+    var pageUrl = REST_SERVER_PATH + "validity/";
     $.ajax({
         type: "GET",
         dataType: "json",
         cache: false,
         async: false,
-        data: {authusername: Cookies.get('username'), sessionkey: Cookies.get('sessionkey')},
+        data: { authusername: Cookies.get('username'), sessionkey: Cookies.get('sessionkey') },
         url: pageUrl,
         success: function (response) {
-            if(response == "1")
+            if (response == "1")
                 valid = true;
-            
+
         },
         error: function (response) {
         }
@@ -43,36 +41,31 @@ valid= false;
     return valid;
 }
 
-function checkCredentials()
-{
+function checkCredentials() {
     if (browserHasGoodCookies() && validateSession()) //Não há sessionkey, fazer login e desaparecer menus nav
     {
         ensoConf.switchApp('passwd');
     }
-    else
-    {
+    else {
         resetSession();
     }
 }
 
-function resetSession()
-{
-        Cookies.remove('sessionkey');
-        Cookies.remove('actions');
-        Cookies.remove('username');
+function resetSession() {
+    Cookies.remove('sessionkey');
+    Cookies.remove('actions');
+    Cookies.remove('username');
 }
 
 function browserHasGoodCookies() {
     return Cookies.get('sessionkey') !== undefined && Cookies.get('actions') !== undefined && Cookies.get('username') !== undefined;
 }
 
-$(document).ready(function ()
-{
+$(document).ready(function () {
     checkCredentials();
     $("input").keypress(function (event) {
 
-        if (event.keyCode == 13)
-        {  
+        if (event.keyCode == 13) {
             performLogin();
         }
     });

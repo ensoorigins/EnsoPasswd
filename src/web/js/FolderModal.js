@@ -51,13 +51,11 @@ var FolderModal =
         },
 
         getCurrentPermissionsList: function () {
-            perms = new Object();
+            var perms = new Object();
 
             $("#user-list-body tr").each(function (index) {
                 perms[$($($(this).children()[0]).children()[1]).text()] = ($($($(this).children()[1]).children()[0]).is(":checked") == true ? 1 : 0);
             });
-
-            console.log(perms);
 
             return perms;
         },
@@ -87,8 +85,8 @@ var FolderModal =
         },
 
         feedAutoComplete: function () {
-            pageUrl = REST_SERVER_PATH + "users/search/";
-            
+            var pageUrl = REST_SERVER_PATH + "users/search/";
+
             $.ajax({
                 type: "GET",
                 dataType: "json",
@@ -102,8 +100,6 @@ var FolderModal =
                         names[val['username']] = null;
                     });
 
-                    console.log(names);
-
                     $('input.autocomplete').autocomplete({
                         data: names,
                         limit: 20, // The max amount of results that can be shown at once. Default: Infinity.
@@ -112,15 +108,14 @@ var FolderModal =
                                 Materialize.toast('Utilizador já existe na lista de permissões.', 3000, 'rounded');
                             else {
 
-                                UserActions.requestUserInfo(val, function(user)
-                            {
+                                UserActions.requestUserInfo(val, function (user) {
 
-                                FolderModal.addPermission(val, 0, user['sysadmin']);
+                                    FolderModal.addPermission(val, 0, user['sysadmin']);
 
-                                LocalizationManager.applyLocaleSettingsToGivenView('folder_modal');
+                                    LocalizationManager.applyLocaleSettingsToGivenView('folder_modal');
 
-                                $('input.autocomplete').val('');
-                            });
+                                    $('input.autocomplete').val('');
+                                });
 
                             }
                         },

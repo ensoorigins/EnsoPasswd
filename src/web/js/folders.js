@@ -4,7 +4,7 @@ if (firstTime === undefined)
 var UserFolderView =
     {
         loadFolderList: function () {
-            pageUrl = REST_SERVER_PATH + "folders/";
+            var pageUrl =REST_SERVER_PATH + "folders/";
 
             $.ajax({
                 type: "GET",
@@ -20,9 +20,9 @@ var UserFolderView =
                     if (response['search'] !== ($(window).width() > 992 ? $("#pesquisa-desktop").val() : $("#pesquisa-mobile").val()) && response['search'] !== '%')
                         return;
 
-                    objectList = $.merge($.merge([], response['folders']), response['credentials']);
+                    var objectList = $.merge($.merge([], response['folders']), response['credentials']);
 
-                    objectList = objectList.sort(function (a, b) {
+                    var objectList = objectList.sort(function (a, b) {
 
                         comparableA = (a['name'] === undefined ? a['title'] : a['name']);
                         comparableB = (b['name'] === undefined ? b['title'] : b['name']);
@@ -30,7 +30,7 @@ var UserFolderView =
                         return comparableA.localeCompare(comparableB);
                     });
 
-                    html = "<thead>\
+                    var html = "<thead>\
                                 <tr>\
                                     <th colspan='2'>Name</th>\
                                     <th class='hide-on-med-and-down'>Description</th>\
@@ -60,7 +60,7 @@ var UserFolderView =
                                 </tr>";
                         }
                         else {
-                            path = "";
+                            var path = "";
 
                             $.each(val['path'], function (ind, val) {
                                 path += '/' + val.name;
@@ -149,7 +149,7 @@ var UserFolderView =
                 return $("#current-folder").val();
         },
         copyUsername: function (id) {
-            username = "";
+            var username = "";
             CredentialActions.requestCredentialInfo(id, function (credentialInfo) {
                 username = credentialInfo['username'];
             }, undefined, false);
@@ -162,7 +162,7 @@ var UserFolderView =
             Materialize.toast(LocalizationManager.getStringFromView('credential_modal', "user-copy"), 2000);
         },
         copyPassword: function (id) {
-            password = "";
+            var password = "";
             CredentialActions.requestCredentialInfo(id, function (credentialInfo) {
                 password = credentialInfo['password'];
             }, undefined, false);
@@ -188,7 +188,7 @@ var UserFolderView =
         updateFolderPath: function () {
             FolderActions.getFolderPath(UserFolderView.getCurrentFolder(), function (path) {
                 $("#breadcrumbs").empty();
-                html = "";
+                var html = "";
                 $.each(path, function (ind, val) {
                     html += "<a class='breadcrumb valign-wrapper' style='cursor:pointer' onclick='UserFolderView.loadFolder(" + val['idFolders'] + ")'>" + val['name'] + "</a>";
                 });
@@ -236,7 +236,7 @@ var UserFolderView =
 
                 FolderActions.requestFolderInfo(id, function (folderInfo) {
 
-                    userHasPermission = false;
+                    var userHasPermission = false;
 
                     $.each(folderInfo['permissions'], function (key, val) {
 
@@ -264,7 +264,7 @@ var UserFolderView =
             UserFolderView.loadFolderList();
         },
         launchFolderAddModal: function () {
-            pageUrl = ensoConf.viewsPath + "modal_folders_add_folder.html";
+            var pageUrl =ensoConf.viewsPath + "modal_folders_add_folder.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -284,7 +284,7 @@ var UserFolderView =
             });
         },
         launchCredentialAddModal: function () {
-            pageUrl = ensoConf.viewsPath + "modal_folders_add_credential.html";
+            var pageUrl =ensoConf.viewsPath + "modal_folders_add_credential.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -312,7 +312,7 @@ var UserFolderView =
         launchFolderEditModal: function () {
             //prepare modal html
 
-            pageUrl = ensoConf.viewsPath + "modal_folders_edit_folder.html";
+            var pageUrl =ensoConf.viewsPath + "modal_folders_edit_folder.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -340,7 +340,7 @@ var UserFolderView =
         launchCredentialEditModal: function (id) {
             //prepare modal html
 
-            pageUrl = ensoConf.viewsPath + "modal_folders_edit_credential.html";
+            var pageUrl =ensoConf.viewsPath + "modal_folders_edit_credential.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",

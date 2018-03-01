@@ -3,7 +3,7 @@ var ShareModal = {
     _credential: undefined,
     show: function (preSelectedCredential = undefined, divToHide = undefined)
     {
-        pageUrl = ensoConf.viewsPath + "share_modal" + (preSelectedCredential === undefined ? "_new" : "") + ".html";
+        var pageUrl =ensoConf.viewsPath + "share_modal" + (preSelectedCredential === undefined ? "_new" : "") + ".html";
         $.ajax({
             type: "GET",
             dataType: "html",
@@ -49,7 +49,7 @@ var ShareModal = {
     },
     showTreeView: function (preSelectedCredential)
     {
-        pageUrl = REST_SERVER_PATH + "folderTreeView/";
+        var pageUrl = REST_SERVER_PATH + "folderTreeView/";
         $.ajax({
             type: "GET",
             dataType: "json",
@@ -58,7 +58,7 @@ var ShareModal = {
             data: {sessionkey: Cookies.get('sessionkey'), authusername: Cookies.get('username')},
             success: function (response) {
 
-                level = 0;
+                var level = 0;
                 $.each(response, function (ind, val)
                 {
                     $("#tree-view").append("<div style='padding-left: " + level + "em; ' id='folder-" + val['id'] + "'>\
@@ -130,7 +130,7 @@ var ShareModal = {
     },
     feedAutoComplete: function ()
     {
-        pageUrl = REST_SERVER_PATH + "users/search/";
+        var pageUrl =REST_SERVER_PATH + "users/search/";
         $.ajax({
             type: "GET",
             dataType: "json",
@@ -139,7 +139,7 @@ var ShareModal = {
             url: pageUrl,
             success: function (response) {
 
-                names = new Object();
+                var names = new Object();
                 $.each(response, function (key, val) {
                     names[val['username']] = null;
                 });

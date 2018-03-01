@@ -16,7 +16,7 @@ var CredentialActions =
                 sessionkey: Cookies.get('sessionkey')
             };
 
-            pageUrl = REST_SERVER_PATH + "credential/";
+            var pageUrl =REST_SERVER_PATH + "credential/";
 
 
             $.ajax({
@@ -42,7 +42,7 @@ var CredentialActions =
 
         },
         requestCredentialInfo: function (credentialId, successFunction, failFunction = undefined, async = true) {
-            pageUrl = REST_SERVER_PATH + "credential/";
+            var pageUrl =REST_SERVER_PATH + "credential/";
 
             $.ajax({
                 type: "GET",
@@ -65,7 +65,7 @@ var CredentialActions =
             });
         },
         removeCredential: function (credentialId, successFunction = undefined, failFunction = undefined) {
-            pageUrl = REST_SERVER_PATH + "credential/";
+            var pageUrl =REST_SERVER_PATH + "credential/";
 
             $.ajax({
                 type: "DELETE",

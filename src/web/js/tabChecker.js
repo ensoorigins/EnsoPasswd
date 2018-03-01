@@ -1,6 +1,6 @@
 function checkTabs() {
     if (ensoConf.getCurrentPage() != '') {
-        pageUrl = ensoConf.viewsPath + ensoConf.getCurrentPage() + "_tabs.html";
+        var pageUrl =ensoConf.viewsPath + ensoConf.getCurrentPage() + "_tabs.html";
 
         $.ajax({
             type: "GET",

@@ -2,7 +2,7 @@ var MessagesOutbox = {
     loadOutbox: function(){
         MessageActions.getOutbox(function(messages)
         {            
-            html = " <ul class='collection'>";
+            var html = " <ul class='collection'>";
             
             $.each(messages, function(key, val)
             {

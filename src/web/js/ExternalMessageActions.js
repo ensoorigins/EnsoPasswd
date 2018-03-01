@@ -1,6 +1,6 @@
 var ExternalMessageActions = {
     getExternalMessage: function (externalKey, successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "externalMessage/";
+        var pageUrl =REST_SERVER_PATH + "externalMessage/";
 
         $.ajax({
             type: "GET",
@@ -26,7 +26,7 @@ var ExternalMessageActions = {
         });
     },
     shareExisting: function (receiver, credential, message, timeToDie, serverpath, successFunction = undefined, failFunction = undefined) {
-        pageUrl = REST_SERVER_PATH + "shareExternal/";
+        var pageUrl =REST_SERVER_PATH + "shareExternal/";
 
         $.ajax({
             type: "POST",
@@ -58,7 +58,7 @@ var ExternalMessageActions = {
     shareNew: function (title, username, password, description, url, receiver, message, timeToDie, serverpath, successFunction = undefined, failFunction = undefined) {
         password = EnsoShared.networkEncode(password);
 
-        pageUrl = REST_SERVER_PATH + "shareExternal/";
+        var pageUrl =REST_SERVER_PATH + "shareExternal/";
 
         $.ajax({
             type: "POST",

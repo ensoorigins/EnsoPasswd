@@ -21,7 +21,7 @@ var SysAdminUserManagement = {
     {
         //prepare modal html
 
-        pageUrl = ensoConf.viewsPath + "modal_user_edit.html";
+        var pageUrl =ensoConf.viewsPath + "modal_user_edit.html";
         $.ajax({
             type: "GET",
             dataType: "html",
@@ -49,7 +49,7 @@ var SysAdminUserManagement = {
     },
     launchUserAddModal: function ()
     {
-        pageUrl = ensoConf.viewsPath + "modal_user_add.html";
+        var pageUrl =ensoConf.viewsPath + "modal_user_add.html";
         $.ajax({
             type: "GET",
             dataType: "html",

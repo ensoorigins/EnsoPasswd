@@ -23,7 +23,7 @@ var PasswordUtil = {
   },
 
   generate: function (length, lowercase, uppercase, numbers, specialchars) {
-    stringPattern = "[";
+    var stringPattern = "[";
 
     if (lowercase)
       stringPattern += "a-z";
@@ -35,10 +35,10 @@ var PasswordUtil = {
     
 
     if (specialchars) {
-      specialSet = "!#$%&()*+-./:;=?[]_{}".split("").sort().toString();
+      var specialSet = "!#$%&()*+-./:;=?[]_{}".split("").sort().toString();
       specialSet = specialSet.replace(",", "");
 
-      actualSet = "";
+      var actualSet = "";
 
       for(i = 0; i < specialSet.length; i++)
         actualSet += "\\" + specialSet[i];

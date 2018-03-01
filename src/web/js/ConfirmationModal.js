@@ -1,7 +1,7 @@
 var ConfirmationModal = {
     show: function (text, onConfirm = undefined, onCancel = undefined, divToHide = undefined)
     {
-        pageUrl = ensoConf.viewsPath + "confirmation_modal.html";
+        var pageUrl =ensoConf.viewsPath + "confirmation_modal.html";
         $.ajax({
             type: "GET",
             dataType: "html",

@@ -2,7 +2,7 @@ setHeight();
 
 function activateUserListTab()
 {
-    pageUrl = ensoConf.viewsPath + "sysadmin_user_list.html";
+    var pageUrl =ensoConf.viewsPath + "sysadmin_user_list.html";
 
     $.ajax({
         type: "GET",
@@ -21,7 +21,7 @@ function activateUserListTab()
 
 function activateManageFoldersTab()
 {
-    pageUrl = ensoConf.viewsPath + "sysadmin_manage_folders.html";
+    var pageUrl =ensoConf.viewsPath + "sysadmin_manage_folders.html";
 
     $.ajax({
         type: "GET",
@@ -39,7 +39,7 @@ function activateManageFoldersTab()
 
 function activateViewLogsTab()
 {
-    pageUrl = ensoConf.viewsPath + "sysadmin_view_logs.html";
+    var pageUrl =ensoConf.viewsPath + "sysadmin_view_logs.html";
 
     $.ajax({
         type: "GET",

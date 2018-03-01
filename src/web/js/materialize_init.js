@@ -19,8 +19,8 @@ function attachSearchAction(action, removePreviousAction = true) {
 }
 
 function hasAction(action) {
-    actions = $.parseJSON(Cookies.get('actions'));
-    hasfound = false;
+    var actions = $.parseJSON(Cookies.get('actions'));
+    var hasfound = false;
 
     $.each(actions, function (key, val) {
         if (val == action) {
@@ -33,9 +33,9 @@ function hasAction(action) {
 
 function setHeight() { //Move content div down and make it fill the height of the remaining screen
 
-    windowHeight = $(window).height();
-    headerHeight = $('#header').height();
-    headerTabsHeight = $('#header-tabs').height();
+    var windowHeight = $(window).height();
+    var headerHeight = $('#header').height();
+    var headerTabsHeight = $('#header-tabs').height();
 
     $('#main-content').css('min-height', windowHeight - headerHeight - headerTabsHeight);
     $('#main-content').css('margin-top', headerTabsHeight);

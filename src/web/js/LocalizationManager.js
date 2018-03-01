@@ -82,7 +82,7 @@ var LocalizationManager =
 
                 $.each(LocalizationManager.localization[view], function (key, val)
                 {
-                    searchString = (val['applyTo'] === "class" ? "." : "#");
+                    var searchString = (val['applyTo'] === "class" ? "." : "#");
                     searchString += key;
                     if (val['text'] != "")
                         $(searchString).text(val['text']);

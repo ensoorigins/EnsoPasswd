@@ -1,7 +1,7 @@
 var AccountModal = {
     show: function ()
     {
-        pageUrl = ensoConf.viewsPath + "modal_normal_user_user_edit.html";
+        var pageUrl =ensoConf.viewsPath + "modal_normal_user_user_edit.html";
         $.ajax({
             type: "GET",
             dataType: "html",

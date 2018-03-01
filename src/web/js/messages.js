@@ -2,7 +2,7 @@ setHeight();
 
 function activateInboxTab()
 {
-    pageUrl = ensoConf.viewsPath + "messages_inbox.html";
+    var pageUrl =ensoConf.viewsPath + "messages_inbox.html";
 
     $.ajax({
         type: "GET",
@@ -21,7 +21,7 @@ function activateInboxTab()
 
 function activateOutboxTab()
 {
-    pageUrl = ensoConf.viewsPath + "messages_outbox.html";
+    var pageUrl =ensoConf.viewsPath + "messages_outbox.html";
 
     $.ajax({
         type: "GET",
