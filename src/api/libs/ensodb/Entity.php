@@ -10,7 +10,7 @@ abstract class Entity implements iEntity
     {
         $db = new EnsoDB();
 
-        $sql = "SELECT COUNT(*) AS N
+        $sql = "SELECT COUNT(*) AS n
                     FROM " . static::$table . " ";
 
         $values = array();
@@ -20,7 +20,7 @@ abstract class Entity implements iEntity
         $db->prepare($sql);
         $db->execute($values);
 
-        return ($db->fetch()['N'] > 0 ? true : false);
+        return ($db->fetch()['n'] > 0 ? true : false);
     }
 
     public static function insert($attributes)
@@ -161,8 +161,8 @@ abstract class Entity implements iEntity
                             $value = $value[0];
                     }
 
-                    $sql .= " $dbName $operator :$dbName AND ";
-                    $values[':' . $dbName] = $value;
+                    $sql .= " $dbName $operator :WHERE$dbName AND ";
+                    $values[':WHERE' . $dbName] = $value;
                 }
             }
 
