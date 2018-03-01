@@ -120,3 +120,5 @@ $('.datepicker').pickadate({
 });
 
 SysAdminLogView.loadNewLogList();
+
+//# sourceURL=sysadmin_view_logs.js

@@ -331,3 +331,7 @@ label{
 #password-options > .col {
     margin-top: 1em !important;
 }
+
+.not-clickable{
+    cursor: default;
+}

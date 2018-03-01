@@ -154,7 +154,7 @@ CREATE TABLE `ExternalMessages` (
   `idExternalMessage` int(11) NOT NULL,
   `message` varchar(250) DEFAULT NULL,
   `timeToDie` int(11) NOT NULL,
-  `externalKey` varchar(32) NOT NULL,
+  `externalKey` text(128) NOT NULL,
   `referencedCredential` int(11) NOT NULL,
   `senderId` varchar(250) NOT NULL,
   `inserted_timestamp` int(11) NOT NULL
@@ -204,20 +204,6 @@ CREATE TABLE `Permissions` (
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `UserInfo`
--- (See below for the actual view)
---
-CREATE TABLE `UserInfo` (
-`username` varchar(250)
-,`email` tinytext
-,`ldap` tinyint(4)
-,`password` tinytext
-,`sysadmin` int(1)
-);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Users`
 --
 
@@ -232,12 +218,11 @@ CREATE TABLE `Users` (
 
 -- --------------------------------------------------------
 
---
--- Structure for view `UserInfo`
---
-DROP TABLE IF EXISTS `UserInfo`;
-
 CREATE VIEW `UserInfo`  AS  select `Users`.`username` AS `username`,`Users`.`email` AS `email`,`Users`.`ldap` AS `ldap`,`Users`.`password` AS `password`,(case `enso_user_roles`.`enso_role_name_enso_roles` when 'SysAdmin' then 1 else 0 end) AS `sysadmin` from (`Users` left join `enso_user_roles` on(((`enso_user_roles`.`id_user` = `Users`.`username`) and (`enso_user_roles`.`enso_role_name_enso_roles` = 'SysAdmin')))) ;
+
+CREATE VIEW `JoinedMessages`  AS  select `Messages`.`idMessages` AS `idMessages`,`Messages`.`message` AS `message`,`Messages`.`timeToDie` AS `timeToDie`,`Messages`.`referencedCredential` AS `referencedCredential`,`Messages`.`senderId` AS `senderId`,`Messages`.`receiverId` AS `receiverId`,`Messages`.`inserted_timestamp` AS `inserted_timestamp`,`Credentials`.`idCredentials` AS `idCredentials`,`Credentials`.`title` AS `title`,`Credentials`.`username` AS `username`,`Credentials`.`password` AS `password`,`Credentials`.`description` AS `description`,`Credentials`.`url` AS `url`,`Credentials`.`belongsToFolder` AS `belongsToFolder`,`Credentials`.`createdById` AS `createdById` from (`Messages` join `Credentials` on((`Credentials`.`idCredentials` = `Messages`.`referencedCredential`))) ;
+
+CREATE VIEW `JoinedExternalMessages`  AS  select `ExternalMessages`.`idExternalMessage` AS `idExternalMessage`,`ExternalMessages`.`message` AS `message`,`ExternalMessages`.`timeToDie` AS `timeToDie`,`ExternalMessages`.`externalKey` AS `externalKey`,`ExternalMessages`.`referencedCredential` AS `referencedCredential`,`ExternalMessages`.`senderId` AS `senderId`,`ExternalMessages`.`inserted_timestamp` AS `inserted_timestamp`,`Credentials`.`idCredentials` AS `idCredentials`,`Credentials`.`title` AS `title`,`Credentials`.`username` AS `username`,`Credentials`.`password` AS `password`,`Credentials`.`description` AS `description`,`Credentials`.`url` AS `url`,`Credentials`.`belongsToFolder` AS `belongsToFolder`,`Credentials`.`createdById` AS `createdById` from (`ExternalMessages` join `Credentials` on((`Credentials`.`idCredentials` = `ExternalMessages`.`referencedCredential`))) ;
 
 --
 -- Indexes for dumped tables

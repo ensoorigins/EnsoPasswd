@@ -127,3 +127,5 @@ SysAdminUserManagement.loadUserList();
 attachSearchAction(SysAdminUserManagement.loadUserList);
 LocalizationManager.applyLocaleSettings();
 $('.tooltipped').tooltip({delay: 50});
+
+//# sourceURL=sysadmin_user_list.js

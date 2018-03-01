@@ -27,3 +27,5 @@ var MessagesInbox = {
 LocalizationManager.applyLocaleSettings();
 $(".tooltipped").tooltip();
 MessagesInbox.loadInbox();
+
+//# sourceURL=messages_inbox.js

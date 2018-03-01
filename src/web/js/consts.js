@@ -7,3 +7,5 @@ function RemoveLastDirectoryPartOf(the_url)
 
 var FRONT_SERVER_PATH = window.location.protocol + "//" + window.location.hostname + window.location.pathname;
 var REST_SERVER_PATH = RemoveLastDirectoryPartOf(RemoveLastDirectoryPartOf(FRONT_SERVER_PATH)) + "/api/index.php/"
+
+//# sourceURL=consts.js

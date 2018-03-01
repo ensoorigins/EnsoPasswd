@@ -66,3 +66,5 @@ var ConfirmationModal = {
     userOnConfirm: undefined,
     userOnCancel: undefined
 };
+
+//# sourceURL=ConfirmationModal.js

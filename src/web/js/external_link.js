@@ -53,3 +53,4 @@ var ExternalLink = {
 
 ExternalLink.load();
 
+//# sourceURL=external_link.js

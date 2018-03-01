@@ -54,3 +54,5 @@ var UserModal =
                     UserModal.enableEditMode();
             }
         };
+
+//# sourceURL=UserModal.js        

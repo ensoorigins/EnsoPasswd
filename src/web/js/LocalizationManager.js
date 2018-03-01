@@ -125,3 +125,5 @@ var LocalizationManager =
         }
 ;
 LocalizationManager.init();
+
+//# sourceURL=LocalizationManager.js

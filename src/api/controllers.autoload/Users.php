@@ -16,225 +16,213 @@
  *  6 - O campo de password é obrigatório
  */
 
-class Users {
-
-    public static function getMatching() {
-
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
+class Users
+{
+    public static function getMatching($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+            $search = Input::validate($request->getParam("search"), Input::$STRING);
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'listUsers')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'listUsers'))
+                throw new RBACDeniedException();
 
         /* 3. validação de inputs */
 
-        $string = '%' . $req->get("search") . '%';
+            $string = '%' . $search . '%';
 
         /* 4. executar operações */
 
-        $listaDeUsers = UserModel::getUsersMatching($string);
+            $listaDeUsers = UserModel::getWhere(
+                [
+                    'username' => ["LIKE", $string]
+                ],
+                [
+                    "username",
+                    "email",
+                    "sysadmin"
+                ]
+            );
+
+            //TODO: May be missing some attributes returned due to not consulting view
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $listaDeUsers);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $listaDeUsers);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed.", EnsoLogsModel::$ERROR, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function getInfoByUsername() {
+    public static function getInfoByUsername($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+            $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel::class, 'username');
 
-        $req = ensoGetRequest();
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        $username = $req->get("username");
-        $authusername = $req->get("authusername");
-        $key = $req->get('sessionkey');
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'listUsers'))
+                throw new RBACDeniedException();
+
+                //TODO: May be missing some attributes returned due to not consulting view
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, UserModel::getWhere(['username' => $username], ["username", "email", "password", "ldap", "sysadmin"])[0]);
+        } catch (EntityCheckFailureException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_FOUND, $e->getCode());
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get user $username, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get user $username, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get user $username, operation failed.", EnsoLogsModel::$ERROR, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
+    }
+
+    public static function editUser($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+            $username = Input::validate($request->getParam('username'), Input::$STRING, 0, UserModel::class, 'username');
+            $email = Input::validate($request->getParam("email"), Input::$EMAIL, 1);
+            $ldap = (int)Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
+            $sysadmin = (int)Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
+
+            $password = $request->getParam("password");
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'listUsers')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers') && $username != $authusername)
+                throw new RBACDeniedException();
 
         /* 3. validação de inputs */
 
         /* 4. executar operações */
 
-        /* 5. response */
+            $roles = EnsoRBACModel::getUserRoles($username);
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, UserModel::getUserInfo($username));
-    }
+            UserModel::editWhere(
+                [
+                    'username' => $username
+                ],
+                [
+                    "email" => $email,
+                    "ldap" => $ldap,
+                    "password" => EnsoShared::hash($password)
+                ]
+            );
 
-    public static function getByUsername() {
-
-        $req = ensoGetRequest();
-
-        $username = $req->get("username");
-
-        $authusername = $req->get("authusername");
-        $key = $req->get('sessionkey');
-
-        /* 1. autenticação - validação do token */
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        /* 2. autorização - validação de permissões */
-
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'listUsers')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        /* 3. validação de inputs */
-
-        /* 4. executar operações */
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, UserModel::getUser($username));
-    }
-
-    public static function editUser() {
-
-        $req = ensoGetRequest();
-
-        $username = $req->put("username");
-        $authusername = $req->put("authusername");
-        $key = $req->put('sessionkey');
-        $email = $req->put("email");
-        $ldap = $req->put("ldap");
-        $sysadmin = $req->put("sysadmin");
-        $password = $req->put("password");
-
-        /* 1. autenticação - validação do token */
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        /* 2. autorização - validação de permissões */
-
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers') && $username != $authusername) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        /* 3. validação de inputs */
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-
-        if (filter_var($ldap, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === NULL)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
-
-        if (!filter_var($sysadmin, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === NULL)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
-
-        /* 4. executar operações */
-
-        $roles = EnsoRBACModel::getUserRoles($username);
-
-        if (!UserModel::editUser($username, $email, $ldap, $password)) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed.", EnsoLogsModel::$ERROR, 'User');
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "erro nos utilziadores");
-        } else {
 
             if ($sysadmin && !in_array("SysAdmin", $roles)) { //é para marcar como sysadmin e ainda não está
                 $return = EnsoRBACModel::addRoleToUser($username, "SysAdmin", time());
 
                 if (!$return) {
                     EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar role");
+                    return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar role");
                 }
             } else
-
-            if (!$sysadmin && in_array("SysAdmin", $roles)) {
+                if (!$sysadmin && in_array("SysAdmin", $roles)) {
                 $return = EnsoRBACModel::removeRoleFromUser($username, "SysAdmin");
 
                 if (!$return) {
                     EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover role");
+                    return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover role");
                 }
             }
-        }
 
-        EnsoLogsModel::addEnsoLog($authusername, "Edited user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
+            EnsoLogsModel::addEnsoLog($authusername, "Edited user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "ok");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "ok");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed.", EnsoLogsModel::$ERROR, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function addUser() {
-
-        $req = ensoGetRequest();
-
-        $username = $req->post("username");
-        $authusername = $req->post("authusername");
-        $key = $req->post('sessionkey');
-        $email = $req->post("email");
-        $ldap = $req->post("ldap");
-        $sysadmin = $req->post("sysadmin");
-        $password = $req->post("password");
+    public static function addUser($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+            $username = Input::validate($request->getParam('username'), Input::$STRICT_STRING, 4);
+            $email = Input::validate($request->getParam("email"), Input::$EMAIL, 1);
+            $ldap = (int)Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
+            $sysadmin = (int)Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
+            $password = Input::validate($request->getParam("password"), Input::$STRICT_STRING, 6);
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
         /* 2. autorização - validação de permissões */
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers'))
+                throw new RBACDeniedException();
 
-        /* 3. validação de inputs */
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-
-        if (!filter_var($ldap, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === NULL)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
-
-        if (!filter_var($sysadmin, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === NULL)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
-
-        if ($username === "")
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 4);
-
-        if (UserModel::userExists($username))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 5);
-
-        if ($password === "")
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 6);
+            if (UserModel::exists(['username' => $username]))
+                throw new BadInputValidationException(5);
 
         /* 4. executar operações */
 
-        if (!UserModel::addUser($username, $email, $ldap, $password)) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel criar");
-        } else {
+            UserModel::insert(
+                [
+                    'username' => $username,
+                    'email' => $email,
+                    'ldap' => $ldap,
+                    'password' => EnsoShared::hash($password)
+                ]
+            );
+
 
             if ($sysadmin) {
                 $return = EnsoRBACModel::addRoleToUser($username, "SysAdmin", time());
 
                 if ($return === false) {
                     EnsoLogsModel::addEnsoLog($authusername, "Tried to add user '$username', operation failed because the role could not be added.", EnsoLogsModel::$ERROR, 'User');
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar a role");
+                    return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar a role");
                 }
             }
 
@@ -242,90 +230,98 @@ class Users {
 
             if (!$return) {
                 EnsoLogsModel::addEnsoLog($authusername, "Tried to add user '$username', operation failed because the role could not be added.", EnsoLogsModel::$ERROR, 'User');
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar a role");
+                return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar a role");
             }
-        }
 
-        EnsoLogsModel::addEnsoLog($authusername, "Added user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
+            EnsoLogsModel::addEnsoLog($authusername, "Added user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "ok");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "ok");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed.", EnsoLogsModel::$ERROR, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function removeUser() {
+    public static function removeUser($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $req = ensoGetRequest();
+            $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel, 'username');
 
-        $username = $req->delete("username");
-        $authusername = $req->delete("authusername");
-        $key = $req->delete('sessionkey');
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        /* 1. autenticação - validação do token */
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        /* 2. autorização - validação de permissões */
-
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        /* 3. validação de inputs */
-
-        /* 4. executar operações */
-
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers'))
+                throw new RBACDeniedException();
 
         //Remover mensagens e credenciais
 
-        $msgsIn = MessageModel::getMessagesReceivedBy($username);
-        $msgsOut = MessageModel::getMessagesSentBy($username);
-        $extMsgsOut = MessageModel::getExternalMessagesSentBy($username);
+            $msgsIn = MessageModel::getWhere(['receiver' => $username]);
+            $msgsOut = MessageModel::getWhere(['sender' => $username]);
+            $extMsgsOut = ExternalMessageModel::getWhere(['sender' => $username]);
 
-        if (MessageModel::removeMessagesWithInteraction($username) === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove user '$username', operation failed because it was impossible to delete messages.", EnsoLogsModel::$ERROR, 'User');
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover mensagens");
-        }
+            MessageModel::delete(['receiver' => $username]);
+            MessageModel::delete(['sender' => $username]);
+            ExternalMessageModel::delete(['sender' => $username]);
 
-        foreach ($msgsIn as $value) {
-            if ($value['belongsToFolder'] == NULL)
-                CredentialModel::removeCredential($value['referencedCredential']);
-        }
+            foreach ($msgsIn as $value) {
+                if ($value['belongsToFolder'] == null)
+                    CredentialModel::delete(['idCredentials' => $value['referencedCredential']]);
+            }
 
-        foreach ($msgsOut as $value) {
-            if ($value['belongsToFolder'] == NULL)
-                CredentialModel::removeCredential($value['referencedCredential']);
-        }
+            foreach ($msgsOut as $value) {
+                if ($value['belongsToFolder'] == null)
+                    CredentialModel::delete(['idCredentials' => $value['referencedCredential']]);
+            }
 
-        foreach ($extMsgsOut as $value) {
-            if ($value['belongsToFolder'] == NULL)
-                CredentialModel::removeCredential($value['referencedCredential']);
-        }
-
-
+            foreach ($extMsgsOut as $value) {
+                if ($value['belongsToFolder'] == null)
+                    CredentialModel::delete(['idCredentials' => $value['referencedCredential']]);
+            }
 
         //Remover user
 
-        PermissionModel::cleanPermissionsFromUser($username);
+            PermissionModel::delete(['userId' => $username]);
 
-        if (!UserModel::removeUser($username)) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove user '$username', operation failed.", EnsoLogsModel::$ERROR, 'User');
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover");
-        } else {
+            UserModel::delete(['username' => $username]);
 
             if (!EnsoRBACModel::removeAllUserRoles($username)) {
                 EnsoLogsModel::addEnsoLog($authusername, "Tried to remove user '$username', operation failed because the roles could not be removed.", EnsoLogsModel::$ERROR, 'User');
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover roles");
+                return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover roles");
             }
-        }
 
-        EnsoLogsModel::addEnsoLog($authusername, "Removed user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
+            EnsoLogsModel::addEnsoLog($authusername, "Removed user '$username'.", EnsoLogsModel::$INFORMATIONAL, 'User');
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "ok");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "ok");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get users matching $search, operation failed.", EnsoLogsModel::$ERROR, "User");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
 }

@@ -40,3 +40,5 @@ var InfiniteScroller =
             }
         };
 ensoConf.addAfterViewCallback(InfiniteScroller.disable);
+
+//# sourceURL=InfiniteScroller.js

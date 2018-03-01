@@ -91,3 +91,5 @@ var CredentialModal =
 
 
         };
+
+        //# sourceURL=modal_folders_edit_credential.js

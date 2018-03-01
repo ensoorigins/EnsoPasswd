@@ -64,3 +64,5 @@ var LanguageModal = {
         $("#language-modal").modal('close');
     }
 };
+
+//# sourceURL=LanguageModal.js

@@ -87,3 +87,5 @@ var CredentialActions =
             });
         }
     };
+
+    //# sourceURL=CredentialActions.js

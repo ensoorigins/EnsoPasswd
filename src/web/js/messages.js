@@ -37,3 +37,5 @@ function activateOutboxTab()
         }
     });
 }
+
+//# sourceURL=messages.js

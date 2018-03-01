@@ -232,3 +232,5 @@ var MessageModal = {
 };
 
 LocalizationManager.applyLocaleSettingsToGivenView('message_modal')
+
+//# sourceURL=MessageModal.js

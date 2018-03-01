@@ -87,7 +87,7 @@ var FolderModal =
         },
 
         feedAutoComplete: function () {
-            pageUrl = REST_SERVER_PATH + "users/search";
+            pageUrl = REST_SERVER_PATH + "users/search/";
             
             $.ajax({
                 type: "GET",
@@ -141,3 +141,5 @@ var FolderModal =
     };
 
 FolderModal.feedAutoComplete();
+
+//# sourceURL=FolderModal.js

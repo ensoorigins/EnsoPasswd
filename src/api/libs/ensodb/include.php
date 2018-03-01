@@ -1,9 +1,12 @@
 <?php
 require 'config.php';
+require 'iEntity.php';
+require 'EntityException.php';
+require 'Entity.php';
 
 class EnsoDB{
 	
-	private static $ENSO_DB_VERSION = "2.0.1";
+	private static $ENSO_DB_VERSION = "2.1.1";
 	
 	private $dbConn = null;
 	private $queryExecute = null;

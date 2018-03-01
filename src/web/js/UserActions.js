@@ -77,7 +77,7 @@ var UserActions =
 
             getUserList: function (search, successFunction = undefined, failFunction = undefined)
             {
-                pageUrl = REST_SERVER_PATH + "users/search";
+                pageUrl = REST_SERVER_PATH + "users/search/";
 
                 $.ajax({
                     type: "GET",
@@ -99,3 +99,5 @@ var UserActions =
                 });
             }
         };
+
+        //# sourceURL=UserActions.js

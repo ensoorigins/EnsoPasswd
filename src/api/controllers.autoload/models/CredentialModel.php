@@ -1,12 +1,22 @@
 <?php
-class CredentialModel
-{
 
-    static $CREDENTIALS_TABLE = 'Credentials';
+class CredentialModel extends Entity
+{
+    protected static $table = "Credentials";
+
+    protected static $columns = [
+        "idCredentials",
+        "title",
+        "username",
+        "password",
+        "description",
+        "url",
+        "belongsToFolder",
+        "createdById"
+    ];
 
     public static function getEncryptionKey()
     {
-
         $key = "";
         global $encryptionKeyLocation;
         $myfile = fopen($encryptionKeyLocation . "encryption.key", "r") or die("Unable to open encryption file!");
@@ -16,68 +26,43 @@ class CredentialModel
         return $key;
     }
 
-    public static function addCredential($title, $username, $password, $description, $url, $belongsTo, $createdBy)
+    public static function insert($attributes)
     {
-        $sql = "INSERT INTO " . self::$CREDENTIALS_TABLE . " " .
-            "(title, username, password, description, url, belongsToFolder, createdById) " .
-            "VALUES " .
-            "(:title, :username, :password, :description, :url, :belongsToFolder, :createdById)";
-
-        $values = array();
-        $values[':title'] = $title;
-        $values[':username'] = $username;
-        $values[':password'] = EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey());
-        $values[':description'] = $description;
-        $values[':url'] = $url;
-        $values[':belongsToFolder'] = $belongsTo;
-        $values[':createdById'] = $createdBy;
-
-        try {
-
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            return $db->getDB()->lastInsertId();
-        } catch (PDOException $e) {
-            return false;
+        if (array_key_exists("password", $attributes)) {
+            $attributes['password'] = EnsoShared::encrypt(EnsoShared::networkDecode($attributes['password']), static::getEncryptionKey());
         }
+
+        return parent::insert($attributes);
     }
 
-    public static function editCredential($id, $title, $username, $password, $description, $url)
+    public static function getWhere($filters, $attributes = null, $range = null)
     {
-        $sql = "UPDATE " . self::$CREDENTIALS_TABLE . " " .
-            "SET " .
-            "title = :title, username = :username, password = :password, description = :description, url = :url " .
-            "WHERE idCredentials = :idCredentials";
+        $result = parent::getWhere($filters, $attributes, $range);
 
-        $values = array();
-        $values[':title'] = $title;
-        $values[':username'] = $username;
-        $values[':password'] = EnsoShared::encrypt(EnsoShared::networkDecode($password), self::getEncryptionKey());
-        $values[':description'] = $description;
-        $values[':url'] = $url;
-        $values[':idCredentials'] = $id;
+        if ($attributes === null || array_key_exists("password", $attributes))
+            foreach ($result as &$cred)
+                $cred['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($cred['password'], static::getEncryptionKey()));
 
-        try {
-
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
+        return $result;
     }
 
-    public static function getCredentialsBelongingToFolder($belongsTo, $string = ['%'])
+    public static function editWhere($filters, $newAttributes)
     {
-        $sql = "SELECT idCredentials, title, createdById FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE BelongsToFolder = :belongsToFolder AND (";
+        if (array_key_exists("password", $newAttributes)) {
+            $newAttributes['password'] = EnsoShared::encrypt(EnsoShared::networkDecode($newAttributes['password']), static::getEncryptionKey());
+        }
 
-            $values = array();
-        foreach ($string as $key => $termo) {
+        parent::editWhere($filters, $newAttributes);
+    }
+
+    public static function getMatchesBelongingTo($belongsTo, $termos = ['%'])
+    {
+        $sql = "SELECT idCredentials, title, createdById FROM " . static::$table . " " .
+            "WHERE belongsToFolder = :belongsToFolder AND (";
+
+        $values = array();
+
+        foreach ($termos as $key => $termo) {
             $sql .= "(LCASE(title) LIKE LCASE(:search$key) OR LCASE(description) LIKE LCASE(:search$key) OR LCASE(url) LIKE LCASE(:search$key)) AND ";
             $values['search' . $key] = $termo;
         }
@@ -88,147 +73,10 @@ class CredentialModel
 
         $values[':belongsToFolder'] = $belongsTo; // save the placeholder
 
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
+        $db = new EnsoDB();
+        $db->prepare($sql);
+        $db->execute($values);
 
-            $rows = $db->fetchAll();
-
-            return $rows;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function getCredentialsById($credentialId)
-    {
-        $sql = "SELECT * FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE idCredentials = :idCredentials";
-
-        $values = array();
-        $values[':idCredentials'] = $credentialId; // save the placeholder
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            $row = $db->fetch();
-
-            $row['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($row['password'], self::getEncryptionKey()));
-
-            return $row;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function removeCredential($credentialId)
-    {
-        $sql = "DELETE FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE idCredentials = :idCredentials";
-
-        $values = array();
-        $values[':idCredentials'] = $credentialId; // save the placeholder
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function removeCredentialsOfFolder($belongsToFolder)
-    {
-        $sql = "DELETE FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE belongsToFolder = :belongsToFolder";
-
-        $values = array();
-        $values[':belongsToFolder'] = $belongsToFolder; // save the placeholder
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function credentialExists($credentialName, $belongsTo)
-    {
-        $sql = "SELECT COUNT(*) FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE title = :title AND belongsToFolder = :belongsToFolder";
-
-        $values = array();
-        $values[':title'] = $credentialName; // save the placeholder
-        $values[':belongsToFolder'] = $belongsTo;
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            $row = $db->fetch(PDO::FETCH_COLUMN);
-
-            if ($row[0] < 1)
-                return false;
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function credentialExistsById($id)
-    {
-        $sql = "SELECT COUNT(*) FROM " . self::$CREDENTIALS_TABLE . " " .
-            "WHERE idCredentials = :idCredentials";
-
-        $values = array();
-        $values[':idCredentials'] = $id; // save the placeholder
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            $row = $db->fetch(PDO::FETCH_COLUMN);
-
-            if ($row[0] < 1)
-                return false;
-
-            return $row;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    public static function moveToFolder($credId, $newParent)
-    {
-        $sql = "UPDATE " . self::$CREDENTIALS_TABLE . " " .
-            "SET belongsToFolder = :belongsToFolder " .
-            "WHERE idCredentials = :idCredentials";
-
-        $values = array();
-        $values[':idCredentials'] = $credId; // save the placeholder
-        $values[':belongsToFolder'] = $newParent;
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            return true;
-        } catch (PDOException $e) {
-            return false;
-        }
+        return $db->fetchAll();
     }
 }

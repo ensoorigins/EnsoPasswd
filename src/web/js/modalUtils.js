@@ -32,3 +32,5 @@ var ModalUtils =
                 $('.tooltipped').tooltip();
             }
         };
+
+        //# sourceURL=modalUtils.js

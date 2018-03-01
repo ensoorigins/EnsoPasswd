@@ -12,7 +12,11 @@ class AuthenticationModel
     public static function performCredentialCheck($username, $password)
     {
 
-        $user = UserModel::getUserInfo($username);
+        $user = UserModel::getWhere(
+            [
+                'username' => $username
+            ]
+        )[0];
 
         if ($user['ldap'] == 1) {
             return self::performExternalCredentialCheck($username, $password);
@@ -29,29 +33,19 @@ class AuthenticationModel
      */
     public static function generateNewSessionKeyForUser($username)
     {
+        $newkey = EnsoShared::generateSecret();
 
-        $sql = "UPDATE " . UserModel::$USERS_TABLE . " " .
-            "SET " .
-            "sessionKey = :sessionKey, " .
-            "trustLimit = :trustLimit " .
-            "WHERE username = :username";
+        UserModel::editWhere(
+            [
+                "username" => $username
+            ],
+            [
+                "sessionKey" => $newkey,
+                "trustLimit" => strtotime('+30 minutes')
+            ]
+        );
 
-        $values = array();
-
-        $values[':username'] = $username; // save the placeholder
-        $values[':sessionKey'] = EnsoShared::generateSecret(); // save the placeholder
-        $values[':trustLimit'] = strtotime('+30 minutes'); // 60 * 30; // save the placeholder
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);			
-				
-			//retorno do valor
-            return $values[':sessionKey'];
-        } catch (PDOException $e) {
-            return false;
-        }
+        return $newkey;
     }
 
     /**
@@ -63,55 +57,35 @@ class AuthenticationModel
      */
     public static function checkIfSessionKeyIsValid($key, $username, $renewTrustLimit = true)
     {
-        $sql = "SELECT username FROM " . UserModel::$USERS_TABLE . " " .
-            "WHERE sessionKey = :sessionKey AND trustLimit > :now AND username = :username";
-
-        $values = array();
-
-        $values[':username'] = $username;
-        $values[':sessionKey'] = $key; // save the placeholder
-        $values[':now'] = time(); // save the placeholder
-
-
-        try {
-            $db = new EnsoDB();
-            $db->prepare($sql);
-            $db->execute($values);
-
-            $rows = $db->fetchAll();
-
-            if (count($rows) !== 1)
-                return false;
+        if (UserModel::exists([
+            'username' => $username,
+            "sessionKey" => $key,
+            "trustLimit" => [">", time()]
+        ])) {
 
             if ($renewTrustLimit) {
-                $sql = "UPDATE " . UserModel::$USERS_TABLE . " " .
-                    "SET " .
-                    "trustLimit = :trustLimit " .
-                    "WHERE username = :username AND sessionKey = :sessionKey";
-
-                $values = array();
-
-                $values[':username'] = $username;
-                $values[':sessionKey'] = $key; // save the placeholder
-                $values['trustLimit'] = strtotime('+30 minutes');
-
-                $db->prepare($sql);
-                $db->execute($values);
+                UserModel::editWhere(
+                    [
+                        'username' => $username
+                    ],
+                    [
+                        'trustLimit' => strtotime('+30 minutes')
+                    ]
+                );
             }
 
             return true;
-        } catch (PDOException $e) {
-            return false;
+        } else {
+            throw new AuthenticationException($username);
         }
     }
 
     public static function performInternalCredentialCheck($password, $userdata)
     {
-
         if ($userdata !== false && $userdata["password"] == EnsoShared::hash($password)) {
             return true;
         } else {
-            return false;
+            throw new AuthenticationException($username);
         }
     }
 
@@ -135,7 +109,7 @@ class AuthenticationModel
 
         $userEntry = ldap_first_entry($ds, $userSearch);
 
-        if ($userEntry === FALSE) //No user found
+        if ($userEntry === false) //No user found
         return 0;
 
         $userDn = ldap_get_dn($ds, $userEntry);
@@ -147,11 +121,11 @@ class AuthenticationModel
             //connected successfully, auth ok
 
             @ldap_close($ds);
-            return 1;
+            return true;
         } else {
 
             /* failed to connect bad auth */
-            return 0;
+            throw new AuthenticationException($username);
         }
     }
 

@@ -89,3 +89,5 @@ var FolderActions =
                 });
             }
         };
+
+        //# sourceURL=FolderActions.js

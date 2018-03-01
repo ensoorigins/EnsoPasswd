@@ -130,7 +130,7 @@ var ShareModal = {
     },
     feedAutoComplete: function ()
     {
-        pageUrl = REST_SERVER_PATH + "users/search";
+        pageUrl = REST_SERVER_PATH + "users/search/";
         $.ajax({
             type: "GET",
             dataType: "json",
@@ -244,3 +244,5 @@ var ShareModal = {
     userOnCancel: undefined
 };
 LocalizationManager.applyLocaleSettingsToGivenView('share_modal')
+
+//# sourceURL=shareModal.js

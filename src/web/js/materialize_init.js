@@ -120,6 +120,8 @@ function dealWithErrorStatusCodes(response, requestSpecificErrors) {
     }
     else {
         console.log("Unknown error " + response.status);
+        console.log(response);
+        console.trace();
     }
 }
 
@@ -203,3 +205,5 @@ $(document).ready(function () {
         }
     }
 });
+
+//# sourceURL=materialize_init.js

@@ -155,3 +155,5 @@ SysAdminFolderManagement.loadFolderList();
 attachSearchAction(SysAdminFolderManagement.loadFolderList);
 $('#root-folder-list').hide();
 $('.tooltipped').tooltip({ delay: 50 });
+
+//# sourceURL=sysadmin_manage_folders.js

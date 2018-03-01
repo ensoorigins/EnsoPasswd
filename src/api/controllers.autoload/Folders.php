@@ -7,294 +7,255 @@ class Folders
      * 3 - Tentativa de atribuição de permissões a utilizador não existente
      */
 
-    public static function getRootFolders()
+    public static function getRootFolders($request, $response, $args)
     {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $req = ensoGetRequest();
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
+            if (EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders') === false)
+                throw new RBACDeniedException();
 
+            $string = '%' . trim(Input::validate($request->getParam("search"), Input::$STRING)) . '%';
 
-        /* 1. autenticação - validação do token */
+            $listaDeFolders = FolderModel::getWhere(
+                [
+                    'parent' => ["IS", null]
+                ]
+            );
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+            foreach ($listaDeFolders as &$folder) {
+                $folder['credentialChildren'] = count(CredentialModel::getWhere(['belongsToFolder' => $folder['idFolders']], ["idCredentials", "title", "createdById"]));
+                $folder['folderChildren'] = count(FolderModel::getWhere(["parent" => $folder['idFolders']]));
+            }
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $listaDeFolders);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get root folders, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get root folders, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get root folders, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-        /* 2. autorização - validação de permissões */
-
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        /* 3. validação de inputs */
-
-        $string = '%' . $req->get("search") . '%';
-
-        /* 4. executar operações */
-
-        $listaDeFolders = FolderModel::getRootFolders($string);
-
-        foreach ($listaDeFolders as &$folder) {
-
-            $folder['credentialChildren'] = count(CredentialModel::getCredentialsBelongingToFolder($folder['idFolders']));
-            $folder['folderChildren'] = count(FolderModel::getAllChildsOf($folder['idFolders'], '%'));
-        }
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $listaDeFolders);
     }
 
-    public static function addNewFolder()
+    public static function addNewFolder($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->post('sessionkey');
-        $authusername = $req->post('authusername');
-        $parent = $req->post('folderId');
-        $name = $req->post('name');
-        $permissions = $req->post('permissions');
+            $parent = $request->getParam('folderId');
+            if ($parent != null)
+                $parent = Input::validate($parent, Input::$INT, 0, FolderModel::class, 'idFolders');
 
+            $name = Input::validate($request->getParam('name'), Input::$STRICT_STRING, 2);
 
-        /* 1. autenticação - validação do token */
+            if (FolderModel::exists(['name' => $name, 'parent' => $parent]))
+                throw new BadInputValidationException(1);
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            $permissions = $request->getParam('permissions');
 
-        /* 2. autorização - validação de permissões */
+            if (count($permissions) > 0)
+                foreach ($permissions as $userId => $hasAdmin)
+                Input::validate($userId, Input::$STRICT_STRING, 3, UserModel::class, 'username');
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        if (!PermissionModel::hasPermissionToAdminFolder($authusername, $parent) && $parent != null) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
+                throw new RBACDeniedException();
 
-        /* 3. validação de inputs */
+            if ($parent != null)
+                PermissionModel::hasPermissionToAdminFolder($authusername, $parent);
+            else if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
+                throw new RBACDeniedException();
 
-        if ($name === "")
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
+            $idFolder = FolderModel::insert([
+                "name" => $name,
+                "createdById" => $authusername,
+                "parent" => $parent
+            ]);
 
-        $name = trim($name);
+            if (count($permissions) == 0) {
+                EnsoLogsModel::addEnsoLog($authusername, "Folder $idFolder was created without permissions, is this a bug?", EnsoLogsModel::$ERROR, 'Folder');
+            } else {
+                PermissionModel::delete(["folder" => $idFolder]);
 
-        if (FolderModel::folderExists($name, $parent))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-
-        if (count($permissions) > 0) {
-            foreach ($permissions as $userId => $hasAdmin) {
-                if (UserModel::userExists($userId) === false) {
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
+                foreach ($permissions as $userId => $hasAdmin) {
+                    PermissionModel::insert(['folder' => $idFolder, "hasAdmin" => $hasAdmin, "userId" => $userId]);
                 }
             }
+
+            EnsoLogsModel::addEnsoLog($authusername, "Folder with id $idFolder was created successfully.", EnsoLogsModel::$INFORMATIONAL, "Folder");
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $title, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $title, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $title, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-
-        /* 4. executar operações */
-
-        $idFolder = FolderModel::addFolder($name, $authusername, $parent);
-
-        if ($idFolder === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to add a new folder, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel aceder a pasta");
-        }
-        if (count($permissions) == 0) {
-            EnsoLogsModel::addEnsoLog($authusername, "Folder $idFolder was created without permissions, is this a bug?", EnsoLogsModel::$ERROR, 'Folder');
-        } else {
-
-            if (PermissionModel::cleanPermissionsFromFolder($idFolder) === false) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to remove permissions from folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissões não limpas");
-            }
-
-            foreach ($permissions as $userId => $hasAdmin) {
-                if (PermissionModel::addNewPermission($idFolder, $hasAdmin, $userId) === false) {
-                    EnsoLogsModel::addEnsoLog($authusername, "Tried to add a new folder $idFolder, operation was interrutpted due to an error creating permissions ", EnsoLogsModel::$ERROR, "Folder");
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissão não criada");
-                }
-            }
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Folder with id $idFolder was created successfully.", EnsoLogsModel::$INFORMATIONAL, "Folder");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "");
     }
 
-    public static function getFolderById()
+    public static function getFolderById($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-        $id = $req->get('folderId');
+            $id = Input::validate($request->getParam('folderId'), Input::$INT, 0, FolderModel::class, 'idFolders');
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+            $infoFolder = FolderModel::getWhere(['idFolders' => $id])[0];
+
+            if ($infoFolder['parent'] == null) {
+                if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
+                    throw new RBACDeniedException();
+
+                PermissionModel::hasPermissionToSeeFolder($authusername, $id);
+            } else
+                PermissionModel::hasPermissionToSeeFolder($authusername, $id);
+
+            $permissions = PermissionModel::getWhere(['folder' => $id]);
+
+            foreach ($permissions as &$perm) {
+                if (EnsoRBACModel::checkUserHasAction($perm['userId'], 'manageRootFolders'))
+                    $perm['sysadmin'] = 1;
+                else
+                    $perm['sysadmin'] = 0;
+            }
+
+            EnsoLogsModel::addEnsoLog($authusername, "Folder $id was accessed.", EnsoLogsModel::$INFORMATIONAL, "Folder");
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ['folderInfo' => $infoFolder, 'permissions' => $permissions]);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get folder $id, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
+    }
+
+    public static function removeFolder($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+            $id = Input::validate($request->getParam('folderId'), Input::$INT, 0, FolderModel::class, 'idFolders');
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        /* 2. autorização - validação de permissões */
+            $infoFolder = FolderModel::getWhere(['idFolders' => $id])[0];
 
-        /* 3. validação de inputs */
+            if ($infoFolder['parent'] == null) {
+                if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
+                    throw new RBACDeniedException();
+                else
+                    PermissionModel::hasPermissionAdminFolder($authusername, $id);
+            } else
+                PermissionModel::hasPermissionToAdminFolder($authusername, $id);
 
-        /* 4. executar operações */
+            $children = FolderModel::getChildFoldersOnAllLevels($id);
 
-        $infoFolder = FolderModel::getFolderById($id);
+            for ($i = count($children) - 1; $i >= 0; $i--) {
+                CredentialModel::delete(['belongsToFolder' => $children[$i]['idFolders']]);
 
-        if ($infoFolder === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to access folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Erro a obter a pasta");
-        }
-
-        if ($infoFolder['parent'] == null) { // se for pasta na root ou tem manageRootFolders ou é folderadmin dela
-            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders') && !PermissionModel::hasPermissionToSeeFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
+                FolderModel::delete(['idFolders' => $children[$i]['idFolders']]);
             }
-        } else { // se não for root então tem de ter fodleradmin
-            if (!PermissionModel::hasPermissionToSeeFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
+
+            if ($infoFolder['parent'] === null)
+                PermissionModel::delete(['folder' => $id]);
+
+            CredentialModel::delete(['belongsToFolder' => $id]);
+
+            FolderModel::delete(['idFolders' => $id]);
+
+            EnsoLogsModel::addEnsoLog($authusername, "Folder $id removed.", EnsoLogsModel::$INFORMATIONAL, "Folder");
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, '');
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get folder $id, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
+    }
 
-        $permissions = PermissionModel::getFolderPermissions($id);
+    public static function getFolderPath($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        if ($permissions === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to access permissions of folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Erro a obter permissões");
-        }
-
-        foreach ($permissions as &$perm) {
-            if (EnsoRBACModel::checkUserHasAction($perm['userId'], 'manageRootFolders'))
-                $perm['sysadmin'] = 1;
+            $id = $request->getParam('folderId');
+            if (!empty($id))
+                Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
             else
-                $perm['sysadmin'] = 0;
+                $id = null;
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
+                throw new RBACDeniedException();
+
+            if ($id != null)
+                PermissionModel::hasPermissionToSeeFolder($authusername, $id);
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, self::walkAndReturnPath($id));
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get folder $id, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Folder $id was accessed.", EnsoLogsModel::$INFORMATIONAL, "Folder");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, ['folderInfo' => $infoFolder, 'permissions' => $permissions]);
-    }
-
-    public static function removeFolder()
-    {
-        $req = ensoGetRequest();
-
-        $key = $req->delete('sessionkey');
-        $authusername = $req->delete('authusername');
-
-        $id = $req->delete('folderId');
-
-        /* 1. autenticação - validação do token */
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        /* 2. autorização - validação de permissões */
-
-        /* 3. validação de inputs */
-
-
-
-        $infoFolder = FolderModel::getFolderById($id);
-
-        if ($infoFolder === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove folder $id, operation failed because no records of this folder were found.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Erro a obter a pasta");
-        }
-
-        if ($infoFolder['parent'] == null) { // se for pasta na root ou tem manageRootFolders ou é folderadmin dela
-            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders') && !PermissionModel::hasPermissionToAdminFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
-        } else { // se não for root então tem de ter fodleradmin
-            if (!PermissionModel::hasPermissionToAdminFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
-        }
-
-        /* 4. executar operações */
-
-        $children = FolderModel::getChildFoldersOnAllLevels($id);
-
-        for ($i = count($children) - 1; $i >= 0; $i--) {
-
-            if (!CredentialModel::removeCredentialsOfFolder($children[$i]['idFolders'])) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to remove credential during removal of folder, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falhou remoção de credenciais");
-            }
-
-            if (!FolderModel::removeFolder($children[$i]['idFolders'])) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to remove child folder " . $children[$i] . " of $id.", EnsoLogsModel::$ERROR, "Folder");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falhou remoção de folder");
-            }
-        }
-
-        if ($infoFolder['parent'] === null) { //É filha de root, eliminar permissões também
-            if (!PermissionModel::cleanPermissionsFromFolder($id)) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to remove permissions from folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falharam a remoção de permissões");
-            }
-        }
-
-        if (!CredentialModel::removeCredentialsOfFolder($id)) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove credentials of folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falhou remoção de credenciais");
-        }
-
-        if (!FolderModel::removeFolder($id)) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falhou remoção de folder");
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Folder $id removed.", EnsoLogsModel::$INFORMATIONAL, "Folder");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, '');
-    }
-
-    public static function getFolderPath()
-    {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-
-        $id = $req->get('folderId');
-
-
-        /* 1. autenticação - validação do token */
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        /* 2. autorização - validação de permissões */
-
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        if (!PermissionModel::hasPermissionToSeeFolder($authusername, $id) && $id != null) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-
-        /* 3. validação de inputs */
-
-        /* 4. executar operações */
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, self::walkAndReturnPath($id));
     }
 
     private static function walkAndReturnPath($id)
@@ -304,7 +265,7 @@ class Folders
         if ($id != null) {
             while (true) {
 
-                $folder = FolderModel::getFolderById($id);
+                $folder = FolderModel::getWhere(["idFolders" => $id], ["parent", "name"])[0];
 
                 array_unshift($path, $folder);
 
@@ -319,87 +280,63 @@ class Folders
         return $path;
     }
 
-    public static function getFolderContentsOnSameLevel()
+    public static function getFolderContentsOnSameLevel($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+        $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-
-        $id = $req->get('folderId'); //opcional se não existir assume root
-        
+        $id = $request->getParam('folderId');
+        if (!empty($id))
+            $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
+        else
+            $id = null; 
         
                 /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-        
-                /* 2. autorização - validação de permissões */
+        AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
+            throw new RBACDeniedException();
 
-        if (!PermissionModel::hasPermissionToSeeFolder($authusername, $id) && $id != null) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-        
-                /* 3. validação de inputs */
-
-        $string = '%';
-        
-                /* 4. executar operações */
+        if ($id !== null)
+            PermissionModel::hasPermissionToSeeFolder($authusername, $id);
 
         $childFolders = array();
         $credentials = array();
 
         if ($id != null) {
-            $childFolders = FolderModel::getAllChildsOf($id, $string);
-            $credentials = CredentialModel::getCredentialsBelongingToFolder($id);
+            $childFolders = FolderModel::getWhere(['parent' => $id]);
+            $credentials = CredentialModel::getWhere(['belongsToFolder' => $id]);
         } else {
-            $childFolders = FolderModel::getRootFoldersAsSeenBy($string, $authusername);
+            $childFolders = FolderModel::getRootFoldersAsSeenBy($authusername);
         }
 
         foreach ($childFolders as &$folder) {
-            $folder['credentialChildren'] = count(CredentialModel::getCredentialsBelongingToFolder($folder['idFolders']));
-            $folder['folderChildren'] = count(FolderModel::getAllChildsOf($folder['idFolders'], '%'));
+            $folder['credentialChildren'] = count(CredentialModel::getWhere(['belongsToFolder' => $folder['idFolders']]));
+            $folder['folderChildren'] = count(FolderModel::getWhere(['parent' => $folder['idFolders']]));
         }
 
-                /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, ["folders" => $childFolders, "credentials" => $credentials, "search" => $string]);
+        return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["folders" => $childFolders, "credentials" => $credentials, "search" => ""]);
     }
 
-    public static function getFolderContentsRecursively()
+    public static function getFolderContentsRecursively($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+        $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-        $string = $req->get('search');
-        $id = $req->get('folderId'); //opcional se não existir assume root
-        
-        /* 1. autenticação - validação do token */
+        $id = $request->getParam('folderId');
+        if ($id !== null)
+            $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-        
-                /* 2. autorização - validação de permissões */
+        $string = Input::validate($request->getParam('search'), Input::$STRICT_STRING);
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+        AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        if (!PermissionModel::hasPermissionToSeeFolder($authusername, $id) && $id != null) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
-        
-        /* 3. validação de inputs */
+        if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
+            throw new RBACDeniedException();
 
-        
-        /* 4. executar operações */
+        if ($id === null)
+            PermissionModel::hasPermissionToSeeFolder($authusername, $id);
 
         $childFolders = array();
         $matchedFolders = array();
@@ -408,173 +345,176 @@ class Folders
         $childFolders = FolderModel::getChildFoldersOnAllLevels($id);
 
         if ($id != null) {
-            array_push($childFolders, FolderModel::getFolderById($id));
+            array_push($childFolders, FolderModel::getWhere(['idFolders' => $id])[0]);
         }
 
         $termos = explode(' ', trim($string));
 
-        for($i = 0; $i < count($termos); $i++)
+        for ($i = 0; $i < count($termos); $i++)
             $termos[$i] = '%' . $termos[$i] . '%';
-        
 
         foreach ($childFolders as $folder) {
-            if (PermissionModel::hasPermissionToSeeFolder($authusername, $folder['idFolders']) === true) {
+            try {
+                PermissionModel::hasPermissionToSeeFolder($authusername, $folder['idFolders']);
+
                 foreach ($termos as $termo) {
-                    if (strpos($folder['name'], trim($termo, "%")) !== false) {
-                        $folder['credentialChildren'] = count(CredentialModel::getCredentialsBelongingToFolder($folder['idFolders']));
-                        $folder['folderChildren'] = count(FolderModel::getAllChildsOf($folder['idFolders'], '%'));
+                    if (strpos(strtolower($folder['name']), strtolower(trim($termo, "%"))) !== false) {
+                        $folder['credentialChildren'] = count(CredentialModel::getWhere(['belongsToFolder' => $folder['idFolders']]));
+                        $folder['folderChildren'] = count(FolderModel::getWhere(['parent' => $folder['idFolders']]));
                         array_push($matchedFolders, $folder);
                         break;
                     }
                 }
 
-                foreach (CredentialModel::getCredentialsBelongingToFolder($folder['idFolders'], $termos) as $cred) {
+                foreach (CredentialModel::getMatchesBelongingTo($folder['idFolders'], $termos) as $cred) {
                     $cred['path'] = self::walkAndReturnPath($folder['idFolders']);
                     array_push($credentials, $cred);
                 }
+            } catch (PermissionDeniedException $e) {
+                    //no permission, not included in array
             }
         }
-        
 
-        
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, ["folders" => $matchedFolders, "credentials" => $credentials, "search" => $string]);
+        return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["folders" => $matchedFolders, "credentials" => $credentials, "search" => $string]);
     }
 
-    public static function getFolderContents()
+    public static function getFolderContents($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        try {
+            if (trim(trim($request->getParam('search')), '%') == "")
+                return self::getFolderContentsOnSameLevel($request, $response, $args);
+            else
+                return self::getFolderContentsRecursively($request, $response, $args);
 
-        if (trim(trim($req->get('search')), '%') == "") {
-            return self::getFolderContentsOnSameLevel();
-        } else {
-            return self::getFolderContentsRecursively();
+        } catch (BadInputValidationException $e) {
+            EnsoDebug::var_error_log($e);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
     }
 
-    public static function editFolder()
+    public static function editFolder($request, $response, $args)
     {
-        $req = ensoGetRequest();
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->put('sessionkey');
-        $authusername = $req->put('authusername');
-        $name = $req->put('name');
-        $id = $req->put('folderId');
-        $permissions = $req->put('permissions');
+            $id = $request->getParam('folderId');
+            if ($id != null)
+                $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
 
+            $name = Input::validate($request->getParam('name'), Input::$STRICT_STRING, 2);
 
-        /* 1. autenticação - validação do token */
+            if (FolderModel::exists(['name' => $name, 'parent' => $parent, "idFolders" => ["<>", $id]]))
+                throw new BadInputValidationException(1);
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            $permissions = $request->getParam('permissions');
 
-        /* 2. autorização - validação de permissões */
+            if (count($permissions) > 0)
+                foreach ($permissions as $userId => $hasAdmin)
+                Input::validate($userId, Input::$STRICT_STRING, 3, UserModel::class, 'username');
 
-        $infoFolder = FolderModel::getFolderById($id);
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        if ($infoFolder === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to edit folder $id, operation failed because no records of this folder were found.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Erro a obter a pasta");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
+                throw new RBACDeniedException();
 
-        if ($infoFolder['parent'] == null) { // se for pasta na root ou tem manageRootFolders ou é folderadmin dela
-            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders') && !PermissionModel::hasPermissionToAdminFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
-        } else { // se não for root então tem de ter fodleradmin
-            if (!PermissionModel::hasPermissionToAdminFolder($authusername, $id)) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
-        }
+            PermissionModel::hasPermissionToAdminFolder($authusername, $id);
 
-        /* 3. validação de inputs */
+            FolderModel::editWhere(
+                [
+                    "idFolders" => $id
+                ],
+                [
+                    "name" => $name,
+                ]
+            );
 
-        if ($name === "")
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
+            if (count($permissions) == 0) {
+                EnsoLogsModel::addEnsoLog($authusername, "Folder $id was created without permissions, is this a bug?", EnsoLogsModel::$ERROR, 'Folder');
+            } else {
+                PermissionModel::delete(["folder" => $id]);
 
-        if (FolderModel::folderExists($name, $infoFolder['parent']) && $infoFolder['name'] != $name)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-
-        if (count($permissions) > 0) {
-            foreach ($permissions as $userId => $hasAdmin) {
-                if (UserModel::userExists($userId) === false) {
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
+                foreach ($permissions as $userId => $hasAdmin) {
+                    PermissionModel::insert(['folder' => $id, "hasAdmin" => $hasAdmin, "userId" => $userId]);
                 }
             }
+
+            EnsoLogsModel::addEnsoLog($authusername, "Edited folder $id.", EnsoLogsModel::$NOTICE, "Folder");
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-        /* 4. executar operações */
-
-        if (!FolderModel::editFolder($name, $id)) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to edit folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Folder não editada");
-        }
-
-        if (PermissionModel::cleanPermissionsFromFolder($id) === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to remove permissions from folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissões não limpas");
-        }
-        EnsoDebug::var_error_log($permissions);
-        if($permissions != NULL){
-            foreach ($permissions as $userId => $hasAdmin) {
-
-                if (PermissionModel::addNewPermission($id, $hasAdmin, $userId) === false) {
-                    EnsoLogsModel::addEnsoLog($authusername, "Tried to add permissions to folder $id, operation failed.", EnsoLogsModel::$ERROR, "Folder");
-                    return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Permissão não criada");
-                }
-            }
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Edited folder $id.", EnsoLogsModel::$NOTICE, "Folder");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "");
     }
 
-    public static function getTreeView()
+    public static function getTreeView($request, $response, $args)
     {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
         
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
-        $treeView = [];
+            $treeView = [];
 
-        $rootFolders = FolderModel::getRootFoldersAsSeenBy("%", $authusername);
+            $rootFolders = FolderModel::getRootFoldersAsSeenBy($authusername);
 
-        if ($rootFolders === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to access root folders, operation failed because no records of these folders were found.", EnsoLogsModel::$ERROR, "Folder");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Erro a obter a pastas");
+            foreach ($rootFolders as $value) {
+                $currentNode = ['id' => $value['idFolders'], 'name' => $value['name'], 'credentials' => [], 'childFolders' => []];
+
+                self::generateTreeView($currentNode);
+
+                array_push($treeView, $currentNode);
+            }
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $treeView);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-        foreach ($rootFolders as $value) {
-            $currentNode = ['id' => $value['idFolders'], 'name' => $value['name'], 'credentials' => [], 'childFolders' => []];
-
-            self::generateTreeView($currentNode);
-
-
-            array_push($treeView, $currentNode);
-        }
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $treeView);
-
-
     }
 
     private static function generateTreeView(&$parentNode)
     {
-        $childs = FolderModel::getAllChildsOf($parentNode['id'], "%");
+        $childs = FolderModel::getWhere(['parent' => $parentNode['id']], ["name", "idFolders"]);
 
         foreach ($childs as $value) {
 
@@ -585,7 +525,7 @@ class Folders
             array_push($parentNode['childFolders'], $currentNode);
         }
 
-        $parentNode['credentials'] = CredentialModel::getCredentialsBelongingToFolder($parentNode['id']);
+        $parentNode['credentials'] = CredentialModel::getWhere(['belongsToFolder' => $parentNode['id']]);
     }
 }
 

@@ -1,66 +1,60 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 class Authentication
 {
-    public static function attemptLogin()
+    public static function attemptLogin($request, $response, $args)
     {
-         $req = ensoGetRequest();
+        try {
 
-        /* 1. autenticação - validação do token */
 
-        /* 2. autorização - validação de permissões */
+            if (file_exists("../setup/")) {
+                return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
+            }
 
-        /* 3. validação de inputs */
-
-        if(file_exists("../setup/"))
-        {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-        }
-
-        $username = $req->get("username");
-        $password = $req->get("password");
+            $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel::class, 'username');
+            $password = Input::validate($request->getParam("password"), Input::$STRING);
 
         /* 4. executar operações */
-        
-        if(AuthenticationModel::performCredentialCheck($username, $password))
-        {
+
+            AuthenticationModel::performCredentialCheck($username, $password);
+
             //Generate Session Key
             $auth_key = AuthenticationModel::generateNewSessionKeyForUser($username);
             
             //Get Actions
-            $actions = EnsoRBACModel::getAvailableUserActions($username);    
-            
-            EnsoLogsModel::addEnsoLog($username, "Logged in.", EnsoLogsModel::$INFORMATIONAL, 'Authentication');
-            
-            return ensoSendResponse( EnsoShared::$ENSO_REST_OK, [ "sessionkey" => $auth_key, "actions" => $actions, "username" => $username]);
-        }
-        else
-        {           
-            ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-                
-        
+            $actions = EnsoRBACModel::getAvailableUserActions($username);
 
-        /* 5. response */
+            EnsoLogsModel::addEnsoLog($username, "Logged in.", EnsoLogsModel::$INFORMATIONAL, 'Authentication');
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["sessionkey" => $auth_key, "actions" => $actions, "username" => $username]);
+
+        } catch (PermissionDeniedException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function checkValidity()
+    public static function checkValidity($request, $response, $args)
     {
-        $req = ensoGetRequest();
-        
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
+        try {
 
-        ensoSendResponse(EnsoShared::$ENSO_REST_OK, AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) ? "1" : "0");
+            $key = Input::Validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "1");
+
+        } catch (PermissionDeniedException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "0");
+        } catch (Exception $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
+
+
     }
 }
 
 $app->get('/auth/', 'Authentication::attemptLogin');
 $app->get('/validity/', 'Authentication::checkValidity');
-//$app->get('/validSession/', 'Authentication::checkIfSessionKeyIsValid');

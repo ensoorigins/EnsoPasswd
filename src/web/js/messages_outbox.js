@@ -27,3 +27,5 @@ var MessagesOutbox = {
 LocalizationManager.applyLocaleSettings();
 $(".tooltipped").tooltip();
 MessagesOutbox.loadOutbox();
+
+//# sourceURL=messages_outbox.js

@@ -62,3 +62,5 @@ var AccountModal = {
         $("#account-modal").modal('close');
     },
 };
+
+//# sourceURL=account_edit_modal.js

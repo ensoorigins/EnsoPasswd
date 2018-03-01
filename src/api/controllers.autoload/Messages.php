@@ -10,95 +10,108 @@
  * 
  */
 
-class Messages {
+class Messages
+{
 
-    public static function addNewMessage() {
-        $req = ensoGetRequest();
+    private static function deleteDeadMessages()
+    {
+        MessageModel::delete(['timeToDie' => ["<=", EnsoShared::now()]]);
+        ExternalMessageModel::delete(['timeToDie' => ["<=", EnsoShared::now()]]);
+    }
 
-        $key = $req->post('sessionkey');
-        $authusername = $req->post('authusername');
-        $receiver = $req->post('receiver');
-        $credential = $req->post('referencedCredential');
-        $message = $req->post('message');
-        $timeToDie = $req->post('timeToDie');
-        $title = $req->post('title');
-        $username = $req->post('username');
-        $password = $req->post('password');
-        $description = $req->post('description');
-        $url = $req->post('url');
+    public static function addNewMessage($request, $response, $args)
+    {
 
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        /* 1. autenticação - validação do token */
+            $receiver = Input::validate($request->getParam('receiver'), Input::$STRICT_STRING, 1, UserModel::class, 'username');
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            $credential = $request->getParam('referencedCredential');
+            if (!empty($credential))
+                $credential = Input::validate($credential, Input::$INT, 2, CredentialModel::class, 'idCredentials');
 
-        /* 2. autorização - validação de permissões */
+            $message = $request->getParam('message');
+            if (!empty($message))
+                $message = Input::validate($message, Input::$STRING);
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'shareCredentials')) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to share a credential but has no such permission", EnsoLogsModel::$NOTICE, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            $timeToDie = $request->getParam('timeToDie');
+            switch ($timeToDie) {
+                case "+6 hours":
+                case "+12 hours":
+                case "+24 hours":
+                case "+7 days":
+                    break;
 
-        /* 3. validação de inputs */
-
-        if (!UserModel::userExists($receiver))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
-
-        switch ($timeToDie) {
-            case "+6 hours":
-            case "+12 hours":
-            case "+24 hours":
-            case "+7 days":
-                break;
-
-            default:
-                return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
-                break;
-        }
-
-        /* 4. executar operações */
-
-        if ($credential === NULL) { //criar cred temporaria
-            $credential = CredentialModel::addCredential($title, $username, $password, $description, $url, NULL, $authusername);
-
-            if ($credential === false) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to create credential in folder $belongsTo , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao criar credencial");
+                default:
+                    throw new BadInputValidationException(3);
             }
-        }
-
-        if (!CredentialModel::credentialExistsById($credential))
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
-
-
-        if (MessageModel::addMessage($message, $timeToDie, $credential, $authusername, $receiver) === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to share credential $credential , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao partilhar credencial");
-        }
-
-        global $ensoMailConfig;
-        Ensomail::sendMail($ensoMailConfig["from"], UserModel::getUser($receiver)['email'], "Notificação de Credencial", "You have received a credential on your EnsoPasswd platform.");
-
-        EnsoLogsModel::addEnsoLog($authusername, "Shared credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "");
-    }
-
-    public static function getInbox() {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+        /* 2. autorização - validação de permissões */
+
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'shareCredentials'))
+                throw new RBACDeniedException();
+
+        /* 4. executar operações */
+
+            if ($credential === null) {
+                $response = Credentials::addNewCredential($request, $response, $args);
+
+                if ($response->getStatusCode() !== EnsoShared::$ENSO_REST_OK)
+                    return $response;
+                else {
+                    $response->getBody()->rewind();
+                    $credential = json_decode($response->getBody()->getContents());
+                }
+            }
+
+            MessageModel::insert([
+                "message" => $message,
+                "timeToDie" => strtotime($timeToDie),
+                "referencedCredential" => $credential,
+                "senderId" => $authusername,
+                "receiverId" => $receiver
+            ]);
+
+            global $ensoMailConfig;
+            Ensomail::sendMail($ensoMailConfig["from"], UserModel::getWhere(["username" => $receiver])[0]['email'], "Notificação de Credencial", "You have received a credential on your EnsoPasswd platform.");
+
+            EnsoLogsModel::addEnsoLog($authusername, "Shared credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
+
+        /* 5. response */
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new message, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new message, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
+    }
+
+    public static function getInbox($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+        /* 1. autenticação - validação do token */
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
@@ -106,33 +119,45 @@ class Messages {
 
         /* 4. executar operações */
 
-        MessageModel::deleteDeadMessages();
+            self::deleteDeadMessages();
 
-        $inbox = MessageModel::getMessagesReceivedBy($authusername);
+            $inbox = MessageModel::getWhere(
+                [
+                    "receiverId" => $authusername
+                ]
+            );
 
-        if ($inbox === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult inbox , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter inbox");
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Consulted inbox", EnsoLogsModel::$INFORMATIONAL, "Messages");
+            EnsoLogsModel::addEnsoLog($authusername, "Consulted inbox", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $inbox);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $inbox);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function getOutbox() {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
+    public static function getOutbox($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
@@ -140,34 +165,45 @@ class Messages {
 
         /* 4. executar operações */
 
-        MessageModel::deleteDeadMessages();
+            self::deleteDeadMessages();
 
-        $outbox = MessageModel::getMessagesSentBy($authusername);
+            $outbox = MessageModel::getWhere(
+                [
+                    "senderId" => $authusername
+                ]
+            );
 
-        if ($outbox === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult outbox , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter outbox");
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Consulted outbox", EnsoLogsModel::$INFORMATIONAL, "Messages");
+            EnsoLogsModel::addEnsoLog($authusername, "Consulted outbox", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $outbox);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $outbox);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get outbox, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get outbox, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get outbox, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function getMessage() {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-        $messageId = $req->get('messageId');
+    public static function getMessage($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+            $messageId = Input::validate($request->getParam('messageId'), Input::$INT, 0, MessageModel::class, 'idMessages');
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
@@ -175,254 +211,265 @@ class Messages {
 
         /* 4. executar operações */
 
-        $message = MessageModel::getMessageById($messageId);
+            $message = MessageModel::getWhere(['idMessages' => $messageId])[0];
 
-        if ($message === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because no record of such message was found.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
+            if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername)
+                throw new PermissionDeniedException();
 
-        if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because user does not have access to this message.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Consulted message $messageId", EnsoLogsModel::$INFORMATIONAL, "Messages");
+            EnsoLogsModel::addEnsoLog($authusername, "Consulted message $messageId", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
 
-        ensoSendResponse(EnsoShared::$ENSO_REST_OK, $message);
+            ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $message);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get message $messageId, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get message $messageId, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get message $messageId, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 
-    public static function saveCredential() {
-        $req = ensoGetRequest();
+    public static function saveCredential($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        $key = $req->post('sessionkey');
-        $authusername = $req->post('authusername');
-        $messageId = $req->post('messageId');
-        $belongsTo = $req->post('belongsTo');
+            $messageId = Input::validate($request->getParam('messageId'), Input::$INT, 0, MessageModel::class, 'idMessages');
+            $belongsTo = Input::validate($request->getParam('belongsTo'), Input::$INT, 5, FolderModel::class, 'idFolders');
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
-        $message = MessageModel::getMessageById($messageId);
+            $message = MessageModel::getWhere(['idMessages' => $messageId])[0];
 
-        if ($message === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because no record of such message was found.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
+            if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername)
+                throw new PermissionDeniedException();
 
-        if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because user does not have access to this message.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
-
-        if ($message['belongsToFolder'] == NULL) {
+            if ($message['belongsToFolder'] == null) {
             /*
-             * Credencial temporaria foi criada ao partilhar
-             */
+                 * Credencial temporaria foi criada ao partilhar
+                 */
 
-            if (FolderModel::folderExistsById($belongsTo) === false)
-                return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 5);
+                if (EnsoRBACModel::checkUserHasAction($authusername, 'manageCredentials') === false)
+                    throw new RBACDeniedException();
 
-            if (EnsoRBACModel::checkUserHasAction($authusername, 'manageCredentials') === false || PermissionModel::hasPermissionToSeeFolder($authusername, $belongsTo) === false) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to create credential in folder $belongsTo , operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Messages");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-            }
+                PermissionModel::hasPermissionToSeeFolder($authusername, $belongsTo);
 
-            if (CredentialModel::moveToFolder($message['idCredentials'], $belongsTo) === false) {
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao mover credencial temporaria");
-            }
-        } else {
+                CredentialModel::editWhere(['idCredentials' => $message['idCredentials']], ['belongsToFolder' => $belongsTo]);
+            } else {
             /*
-             * This is tricky ok... os paramteros de credenciais estão cá todos por isso vou tratar esta request como uma de credencial
-             * Se correr mal faz de conta que tentei inserir uma credencial e está mal 
-             */
+                 * This is tricky ok... os paramteros de credenciais estão cá todos por isso vou tratar esta request como uma de credencial
+                 * Se correr mal faz de conta que tentei inserir uma credencial e está mal 
+                 */
 
-            Credentials::addNewCredential();
+                $response = Credentials::addNewCredential($request, $response, $args);
 
-            global $app;
-            if ($app->response()->finalize()[0] != EnsoShared::$ENSO_REST_OK) {
-                return;
+                if ($response->getStatusCode() !== EnsoShared::$ENSO_REST_OK)
+                    return $response;
+                    else {
+                        $response->getBody()->rewind();
+                        $credential = json_decode($response->getBody()->getContents());
+                    }
             }
-        }
 
         /* Credencial bem inserida vou eliminar mensagem  */
 
         /* 4. executar operações */
 
-        MessageModel::removeMessage($messageId);
+            MessageModel::delete(['idMessages' => $messageId]);
 
-        EnsoLogsModel::addEnsoLog($authusername, "Saved credential from message $messageId", EnsoLogsModel::$INFORMATIONAL, "Messages");
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "");
-    }
-
-    public static function deleteMessage() {
-        $req = ensoGetRequest();
-        
-        $key = $req->delete('sessionkey');
-        $authusername = $req->delete('authusername');
-        $messageId = $req->delete('messageId');
-
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
-
-        $message = MessageModel::getMessageById($messageId);
-
-        if ($message === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because no record of such message was found.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
-
-        if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to consult message $messageId , operation failed because user does not have access to this message.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao obter mensagem");
-        }
-
-        MessageModel::removeMessage($messageId);
-        
-        if($message['belongsToFolder'] === NULL)
-        {
-            CredentialModel::removeCredential($message['referencedCredential']);
-        }
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, "");
-    }
-    
-    public static function getExternalMessage() {
-        $req = ensoGetRequest();
-
-        $externalKey = $req->get('externalKey');
-
-        /* 1. autenticação - validação do token */
-
-        /* 2. autorização - validação de permissões */
-
-        /* 3. validação de inputs */
-
-        /* 4. executar operações */
-
-        $message = MessageModel::getExternalMessage($externalKey);
-
-        if ($message === false) {
-            EnsoLogsModel::addEnsoLog("external", "Tried to consult message with key $externalKey , operation failed because no record of such message was found.", EnsoLogsModel::$ERROR, "External Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_FOUND, "Falha ao obter mensagem");
-        }
-
-        EnsoLogsModel::addEnsoLog("external", "Consulted message with key $externalKey", EnsoLogsModel::$INFORMATIONAL, "External Messages");
-        
-        MessageModel::removeExternalMessage($externalKey);
+            EnsoLogsModel::addEnsoLog($authusername, "Saved credential from message $messageId", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
 
-        if($message['belongsToFolder'] === NULL)
-        {
-            CredentialModel::removeCredential($message['referencedCredential']);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            EnsoDebug::var_error_log($e);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to save credential from message $messageId, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to save credential from message $messageId, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to save credential from message $messageId, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-        
-        ensoSendResponse(EnsoShared::$ENSO_REST_OK, $message);
     }
-    
-    public static function addNewExternalMessage() {
-        $req = ensoGetRequest();
 
-        $key = $req->post('sessionkey');
-        $authusername = $req->post('authusername');
-        $receiver = $req->post('receiver');
-        $credential = $req->post('referencedCredential');
-        $message = $req->post('message');
-        $timeToDie = $req->post('timeToDie');
-        $title = $req->post('title');
-        $username = $req->post('username');
-        $password = $req->post('password');
-        $description = $req->post('description');
-        $url = $req->post('url');
-        $destination = $req->post('destination');
-        $serverpath = $req->post('serverpath');
+    public static function deleteMessage($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        /* 1. autenticação - validação do token */
+            $messageId = Input::validate($request->getParam('messageId'), Input::$INT, 0, MessageModel::class, 'idMessages');
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+            $message = MessageModel::getWhere(['idMessages' => $messageId])[0];
+
+            if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername)
+                throw new PermissionDeniedException();
+
+            MessageModel::delete(['idMessages' => $messageId]);
+
+            if ($message['belongsToFolder'] === null)
+                CredentialModel::delete(['idCredentials' => $message['referencedCredential']]);
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to delete external message, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to delete external message, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to delete external message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
+    }
 
-        /* 2. autorização - validação de permissões */
+    public static function getExternalMessage($request, $response, $args)
+    {
+        try {
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'shareCredentials')) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to share a credential but has no such permission", EnsoLogsModel::$NOTICE, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
+            $externalKey = Input::validate($request->getParam('externalKey'), Input::$STRING, 0, ExternalMessageModel::class, 'externalKey');
+
+            $message = ExternalMessageModel::getWhere(['externalKey' => $externalKey])[0];
+
+            EnsoLogsModel::addEnsoLog("external", "Consulted message with key $externalKey", EnsoLogsModel::$INFORMATIONAL, "External Messages");
+
+            ExternalMessageModel::delete(['externalKey' => $externalKey]);
+
+            if ($message['belongsToFolder'] === null)
+                CredentialModel::delete(['idCredentials' => $message['referencedCredential']]);
+
+            ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $message);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_FOUND, $e->getCode());
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog("external", "Tried to get external message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
+    }
 
-        /* 3. validação de inputs */
+    public static function addNewExternalMessage($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-        switch ($timeToDie) {
-            case "+6 hours":
-            case "+12 hours":
-            case "+24 hours":
-            case "+7 days":
-                break;
+            $receiver = $request->getParam('receiver');
+            if (!empty($receiver))
+                $receiver = Input::validate($receiver, Input::$EMAIL, 4);
 
-            default:
-                return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 3);
-                break;
-        }
+            $credential = $request->getParam('referencedCredential');
+            if ($credential === null)
+                $credential = Input::validate($credential, Input::$INT, 2, CredentialModel::class, 'idCredentials');
 
-        if (!filter_var($receiver, FILTER_VALIDATE_EMAIL) && $receiver !== "")
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 4);
+            $message = $request->getParam('message');
+            if (!empty($message))
+                $message = Input::validate($message, Input::$STRING);
 
-        /* 4. executar operações */
-
-        if ($credential === NULL) { //criar cred temporaria
-            $credential = CredentialModel::addCredential($title, $username, $password, $description, $url, NULL, $authusername);
-
-            if ($credential === false) {
-                EnsoLogsModel::addEnsoLog($authusername, "Tried to create credential in folder $belongsTo , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-                return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao criar credencial");
+            $timeToDie = $request->getParam('timeToDie');
+            switch ($timeToDie) {
+                case "+6 hours":
+                case "+12 hours":
+                case "+24 hours":
+                case "+7 days":
+                    break;
+                default:
+                    throw new BadInputValidationException("bad timetodie", 3);
             }
-        }
 
-
-        if (CredentialModel::credentialExistsById($credential) === false)
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 2);
-
-
-        $externalKey = MessageModel::addExternalMessage($message, $timeToDie, $credential, $authusername);
-        
-        if ($externalKey === false) {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to share credential $credential , operation failed.", EnsoLogsModel::$ERROR, "Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao partilhar credencial");
-        }
-
-        EnsoLogsModel::addEnsoLog($authusername, "Shared external credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
-
-        global $ensoMailConfig;
-        
-        if($receiver != "")
-            Ensomail::sendMail($ensoMailConfig["from"], $receiver, "Notificação de Credencial", $serverpath . $externalKey);
-
-        /* 5. response */
-
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $externalKey);
-    }
-
-    public static function getInboxCount() {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-
-
+            $destination = $request->getParam('destination');
+            $serverpath = $request->getParam('serverpath');
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+        /* 2. autorização - validação de permissões */
+
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'shareCredentials'))
+                throw new RBACDeniedException();
+
+        /* 4. executar operações */
+
+            if ($credential === null) {
+                $response = Credentials::addNewCredential($request, $response, $args);
+
+                if ($response->getStatusCode() !== EnsoShared::$ENSO_REST_OK)
+                    return $response;
+                    else {
+                        $response->getBody()->rewind();
+                        $credential = json_decode($response->getBody()->getContents());
+                    }
+            }
+
+
+            $externalKey = ExternalMessageModel::insert([
+                "message" => $message,
+                "timeToDie" => $timeToDie,
+                "referencedCredential" => $credential,
+                "senderId" => $authusername
+            ]);
+
+            EnsoLogsModel::addEnsoLog($authusername, "Shared external credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
+
+            global $ensoMailConfig;
+
+            if ($receiver != "")
+                Ensomail::sendMail($ensoMailConfig["from"], $receiver, "Notificação de Credencial", $serverpath . $externalKey);
+
+        /* 5. response */
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $externalKey);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new external message, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new external message, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to add new external message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
+    }
+
+    public static function getInboxCount($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+        /* 1. autenticação - validação do token */
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
@@ -430,17 +477,28 @@ class Messages {
 
         /* 4. executar operações */
 
-        $count = MessageModel::getInboxCount($authusername);
+            $count = count(MessageModel::getWhere(['receiverId' => $authusername]));
 
-        if ($count === false) {
-            EnsoLogsModel::addEnsoLog("external", "Tried to consult inbox count , operation failed.", EnsoLogsModel::$ERROR, "External Messages");
-            return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Falha ao contagem");
-        }
-        
+            EnsoDebug::d($count);
 
         /* 5. response */
-        
-        ensoSendResponse(EnsoShared::$ENSO_REST_OK, $count['numero']);
+
+            ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $count);
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (PermissionDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox count, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox count, operation failed due to lack of RBAC permissions.", EnsoLogsModel::$NOTICE, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get inbox count, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 }
 

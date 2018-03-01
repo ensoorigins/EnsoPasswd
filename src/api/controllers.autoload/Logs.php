@@ -7,101 +7,90 @@
  * 
  */
 
-class Logs {
-    public static function getFilterInfo()
+class Logs
+{
+    public static function getFilterInfo($request, $response, $args)
     {
-        $req = ensoGetRequest();
-
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
         /* 2. autorização - validação de permissões */
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'viewLogs')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'viewLogs'))
+                throw new RBACDeniedException();
 
         /* 3. validação de inputs */
 
         /* 4. executar operações */
 
-        $facilities = EnsoLogsModel::getAvailableFacilities();
-        $severities = EnsoLogsModel::getUsedSeverityLevels();
-        $users = EnsoLogsModel::getUsersPresentInLogs();
+            $facilities = EnsoLogsModel::getAvailableFacilities();
+            $severities = EnsoLogsModel::getUsedSeverityLevels();
+            $users = EnsoLogsModel::getUsersPresentInLogs();
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, ["facilities" => $facilities, "severities" => $severities, "users" => $users]);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["facilities" => $facilities, "severities" => $severities, "users" => $users]);
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get external message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
-    
-        public static function getLogs()
-    {
-        $req = ensoGetRequest();
 
-        $key = $req->get('sessionkey');
-        $authusername = $req->get('authusername');
-        $facility = $req->get('facility');
-        $startTime = $req->get('startTime');
-        $endTime = $req->get('endTime');
-        $severity = $req->get('severity');
-        $userSearch = $req->get('userSearch');
-        $startIndex = $req->get('startIndex');
-        $advance = $req->get('advance');
-        $searchString = $req->get('search');
+    public static function getLogs($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+            $facility = Input::validate($request->getParam('facility'), Input::$STRING);
+            $startTime = Input::validate($request->getParam('startTime'), Input::$STRING);
+            $endTime = Input::validate($request->getParam('endTime'), Input::$STRING);
+            $severity = Input::validate($request->getParam('severity'), Input::$STRING);
+            $userSearch = Input::validate($request->getParam('userSearch'), Input::$STRING);
+            $startIndex = Input::validate($request->getParam('startIndex'), Input::$STRING);
+            $advance = Input::validate($request->getParam('advance'), Input::$STRING);
+            $searchString = Input::validate($request->getParam('search'), Input::$STRING);
 
 
         /* 1. autenticação - validação do token */
 
-        if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
-        }
+            if (AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername) === false) {
+                return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+            }
 
         /* 2. autorização - validação de permissões */
 
-        if (!EnsoRBACModel::checkUserHasAction($authusername, 'viewLogs')) {
-            return ensoSendResponse(EnsoShared::$ENSO_REST_FORBIDDEN, "");
-        }
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'viewLogs')) {
+                return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+            }
 
         /* 3. validação de inputs */
-        
-        if($facility === NULL)
-            $facility = "";
-        
-        if($severity === NULL)
-            $severity = "";
-        
-        if(($startTime === "" xor $startTime === "") || ($startTime > $endTime))
-        {
-            $startTime = NULL;
-            $endTime = NULL;
-        }
-        else
-        {
-            $endTime = strtotime('+1 day', intval($endTime));
-        }
-        
-        $searchString = '%' . $searchString . '%';
+
+            if (($startTime === "" xor $startTime === "") || ($startTime > $endTime)) {
+                $startTime = null;
+                $endTime = null;
+            } else {
+                $endTime = strtotime('+1 day', intval($endTime));
+            }
+
+            $searchString = '%' . $searchString . '%';
 
         /* 4. executar operações */
 
-        $logs = EnsoLogsModel::getLogs($facility, $startTime, $endTime, $severity, $userSearch, $startIndex, $advance, $searchString);
-        
-        if($logs === false)
-        {
-            EnsoLogsModel::addEnsoLog($authusername, "Tried to access logs but operation failed", EnsoLogsModel::$ERROR, "Logs");
-             return ensoSendResponse(EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
-        }
+            $logs = EnsoLogsModel::getLogs($facility, $startTime, $endTime, $severity, $userSearch, $startIndex, $advance, $searchString);
 
         /* 5. response */
 
-        return ensoSendResponse(EnsoShared::$ENSO_REST_OK, $logs);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $logs);
+        } catch (Exception $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to get external message, operation failed.", EnsoLogsModel::$ERROR, "Message");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
     }
 }
 

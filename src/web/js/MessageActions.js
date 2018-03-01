@@ -230,3 +230,5 @@ var MessageActions = {
         });
     }
 };
+
+//# sourceURL=MessageActions.js

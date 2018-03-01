@@ -61,3 +61,5 @@ if (!hasAction('accessSysAdminArea'))
 {
     ensoConf.switchApp(ensoConf.defaultApp);
 }
+
+//# sourceURL=sysadmin.js
