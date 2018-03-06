@@ -16,8 +16,6 @@ var CredentialModal =
                 $("#edit-description").addClass("readonly");
                 $("#edit-url").addClass("readonly");
 
-
-
                 $("#edit-generate-password").hide();
 
                 $(".modal-footer").hide();

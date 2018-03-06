@@ -151,14 +151,24 @@ abstract class Entity implements iEntity
                     throw new InexistentAttributeProvidedException();
                 } else {
 
-                    $operator = '=';
+                    $operator = '';
 
                     if (is_array($value)) {
                         if (count($value) > 1) {
                             $operator = $value[0];
                             $value = $value[1];
-                        } else
+                        } else {
                             $value = $value[0];
+                            if ($value === null)
+                                $operator = "IS";
+                            else
+                                $operator = "=";
+                        }
+                    } else {
+                        if ($value === null)
+                            $operator = "IS";
+                        else
+                            $operator = "=";
                     }
 
                     $sql .= " $dbName $operator :WHERE$dbName AND ";

@@ -325,8 +325,10 @@ class Folders
         $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
         $id = $request->getParam('folderId');
-        if ($id !== null)
+        if (!empty($id))
             $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
+        else
+            $id = null;
 
         $string = Input::validate($request->getParam('search'), Input::$STRICT_STRING);
 
@@ -335,7 +337,7 @@ class Folders
         if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
             throw new RBACDeniedException();
 
-        if ($id === null)
+        if ($id !== null)
             PermissionModel::hasPermissionToSeeFolder($authusername, $id);
 
         $childFolders = array();
@@ -348,6 +350,8 @@ class Folders
             array_push($childFolders, FolderModel::getWhere(['idFolders' => $id])[0]);
         }
 
+        EnsoDebug::var_error_log($childFolders);
+
         $termos = explode(' ', trim($string));
 
         for ($i = 0; $i < count($termos); $i++)
@@ -356,6 +360,9 @@ class Folders
         foreach ($childFolders as $folder) {
             try {
                 PermissionModel::hasPermissionToSeeFolder($authusername, $folder['idFolders']);
+
+                EnsoDebug::d("Can see folder");
+                EnsoDebug::var_error_log($folder);
 
                 foreach ($termos as $termo) {
                     if (strpos(strtolower($folder['name']), strtolower(trim($termo, "%"))) !== false) {

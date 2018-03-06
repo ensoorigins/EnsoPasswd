@@ -3,8 +3,10 @@ if (firstTime === undefined)
 
 var UserFolderView =
     {
+        _openLastCredential: undefined,
+
         loadFolderList: function () {
-            var pageUrl =REST_SERVER_PATH + "folders/";
+            var pageUrl = REST_SERVER_PATH + "folders/";
 
             $.ajax({
                 type: "GET",
@@ -89,7 +91,7 @@ var UserFolderView =
                                         <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-password-label'></p>\
                                     </td >\
-                                    <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='" + (val['url'] == "" ? "not-clickable " : "") +  "hide-on-med-and-down center-align'>\
+                                    <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='" + (val['url'] == "" ? "not-clickable " : "") + "hide-on-med-and-down center-align'>\
                                         <p><i class='" + (val['url'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>open_in_new</i></p>\
                                         <p style='font-size: 0.8em;' class='open-url-label'></p>\
                                     </td>\
@@ -264,7 +266,7 @@ var UserFolderView =
             UserFolderView.loadFolderList();
         },
         launchFolderAddModal: function () {
-            var pageUrl =ensoConf.viewsPath + "modal_folders_add_folder.html";
+            var pageUrl = ensoConf.viewsPath + "modal_folders_add_folder.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -284,7 +286,7 @@ var UserFolderView =
             });
         },
         launchCredentialAddModal: function () {
-            var pageUrl =ensoConf.viewsPath + "modal_folders_add_credential.html";
+            var pageUrl = ensoConf.viewsPath + "modal_folders_add_credential.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -306,13 +308,21 @@ var UserFolderView =
                 complete: function () {
                     UserFolderView.loadFolderList();
                     ModalUtils.refreshTooltips();
+
+                    if (UserFolderView._openLastCredential != undefined) {
+                        setTimeout(function () {
+                            UserFolderView.launchCredentialEditModal(UserFolderView._openLastCredential);
+                            UserFolderView._openLastCredential = undefined;
+                        }, 300);
+
+                    }
                 }
             });
         },
         launchFolderEditModal: function () {
             //prepare modal html
 
-            var pageUrl =ensoConf.viewsPath + "modal_folders_edit_folder.html";
+            var pageUrl = ensoConf.viewsPath + "modal_folders_edit_folder.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
@@ -320,7 +330,7 @@ var UserFolderView =
                 url: pageUrl,
                 success: function (response) {
 
-                    $('#folder-modal').empty().append(response);
+                    $('#folder-modal').html(response);
                     $('#folder-modal').modal('open');
 
                     FolderActions.requestFolderInfo(UserFolderView.getCurrentFolder(), function (folderInfo) {
@@ -340,14 +350,13 @@ var UserFolderView =
         launchCredentialEditModal: function (id) {
             //prepare modal html
 
-            var pageUrl =ensoConf.viewsPath + "modal_folders_edit_credential.html";
+            var pageUrl = ensoConf.viewsPath + "modal_folders_edit_credential.html";
             $.ajax({
                 type: "GET",
                 dataType: "html",
                 cache: false,
                 url: pageUrl,
                 success: function (response) {
-
                     $('#folder-modal').empty().append(response);
                     $('#folder-modal').modal('open');
 
@@ -364,8 +373,6 @@ var UserFolderView =
                         Materialize.updateTextFields();
                         $('#edit-description').trigger('autoresize');
                     });
-
-
                 },
                 error: function (response) {
                 }
@@ -441,6 +448,16 @@ var UserFolderView =
         createCredential: function () {
 
             if (ModalUtils.modalIsValid()) {
+
+                $("#folder-modal.modal-content").children().each(function () {
+                    if ($(this).hasClass('loader'))
+                        $(this).show();
+                    else
+                        $(this).hide();
+                });
+
+                $("#folder-modal.modal-content").hide();
+
                 CredentialActions.saveCredentialInfo(
                     true,
                     null,
@@ -450,9 +467,19 @@ var UserFolderView =
                     $("#edit-description").val(),
                     $("#edit-url").val(),
                     UserFolderView.getCurrentFolder(),
-                    function () {
+                    function (id) {
+                        UserFolderView._openLastCredential = id;
                         $('#folder-modal').modal('close');
+                    },
+                    function () {
+                        $("#folder-modal.modal-content").children().each(function () {
+                            if ($(this).hasClass('loader'))
+                                $(this).hide();
+                            else
+                                $(this).show();
+                        });
 
+                        $("#folder-modal.modal-content").show();
                     }
                 );
             }
