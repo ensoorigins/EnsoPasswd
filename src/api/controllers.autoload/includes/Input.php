@@ -21,7 +21,7 @@ class Input
 
         switch ($type) {
             case self::$STRING:
-                $result = filter_var($var, FILTER_SANITIZE_STRING);
+                $result = filter_var($var, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
                 break;
             case self::$STRICT_STRING:
                 $result = filter_var($var, FILTER_SANITIZE_STRING);
