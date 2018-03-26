@@ -1,6 +1,8 @@
 if (firstTime === undefined)
     var firstTime = undefined;
 
+console.log(firstTime);
+
 var UserFolderView =
     {
         _openLastCredential: undefined,
@@ -22,6 +24,15 @@ var UserFolderView =
                     if (response['search'] !== ($(window).width() > 992 ? $("#pesquisa-desktop").val() : $("#pesquisa-mobile").val()) && response['search'] !== '%')
                         return;
 
+                    var sortedFolders = response['folders'].sort(function (a, b) {
+                        return a['name'].localeCompare(b['name']);
+                    });
+
+                    var sortedCredentials = response['credentials'].sort(function (a, b) {
+                        return a['title'].localeCompare(b['title']);
+                    });
+
+                    /*
                     var objectList = $.merge($.merge([], response['folders']), response['credentials']);
 
                     var objectList = objectList.sort(function (a, b) {
@@ -31,6 +42,8 @@ var UserFolderView =
 
                         return comparableA.localeCompare(comparableB);
                     });
+
+                    */
 
                     var html = "<thead>\
                                 <tr>\
@@ -42,9 +55,69 @@ var UserFolderView =
                             </thead>\
                             <tbody>";
 
-                    $.each(objectList, function (key, val) {
-                        if (val['name'] !== undefined) {
-                            html += "<tr onclick='ensoConf.goToPage(\"folders\", {id : " + val['idFolders'] + "})'>\
+                    /*
+            $.each(objectList, function (key, val) {
+                if (val['name'] !== undefined) {
+                    html += "<tr onclick='ensoConf.goToPage(\"folders\", {id : " + val['idFolders'] + "})'>\
+                            <td>\
+                                <i class='enso-orange-text material-icons'>folder</i>\
+                            </td>\
+                            <td>\
+                                <span class='flow-text'>" + val['name'] + "</span>\
+                            </td>\
+                            <td class='hide-on-med-and-down' >\
+                                " + val['folderChildren'] + " <span class='folder-label'></span>; " + val['credentialChildren'] + " <span class='credential-label'></span> \
+                            </td>\
+                            <td class='hide-on-med-and-down' >\
+                                <p>" + val['createdById'] + "</p>\
+                            </td>\
+                            <td colspan='3' class='hide-on-med-and-down center-align'>\
+                            </td>\
+                        </tr>";
+                }
+                else {
+                    var path = "";
+
+                    $.each(val['path'], function (ind, val) {
+                        path += '/' + val.name;
+                    });
+
+                    path += '/';
+
+                    html += "<tr>\
+                            <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                <i class='enso-orange-text material-icons'>lock_outline</i>\
+                            </td>\
+                            <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                <span class='flow-text'>" + val['title'] + "</span>\
+                            </td>\
+                            <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                " + path + "\
+                            </td>\
+                            <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
+                                <p>" + val['createdById'] + "</p>\
+                            </td>\
+                            <td onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
+                                <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
+                                <p style='font-size: 0.8em;' class='copy-user-label'></p>\
+                            </td >\
+                            <td onclick='UserFolderView.copyPassword(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
+                                <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
+                                <p style='font-size: 0.8em;' class='copy-password-label'></p>\
+                            </td >\
+                            <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='" + (val['url'] == "" ? "not-clickable " : "") + "hide-on-med-and-down center-align'>\
+                                <p><i class='" + (val['url'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>open_in_new</i></p>\
+                                <p style='font-size: 0.8em;' class='open-url-label'></p>\
+                            </td>\
+                        </tr>";
+
+                }
+            });
+
+            */
+
+                    $.each(sortedFolders, function (key, val) {
+                        html += "<tr onclick='ensoConf.goToPage(\"folders\", {id : " + val['idFolders'] + "})'>\
                                     <td>\
                                         <i class='enso-orange-text material-icons'>folder</i>\
                                     </td>\
@@ -60,17 +133,18 @@ var UserFolderView =
                                     <td colspan='3' class='hide-on-med-and-down center-align'>\
                                     </td>\
                                 </tr>";
-                        }
-                        else {
-                            var path = "";
+                    });
 
-                            $.each(val['path'], function (ind, val) {
-                                path += '/' + val.name;
-                            });
+                    $.each(sortedCredentials, function (key, val) {
+                        var path = "";
 
-                            path += '/';
+                        $.each(val['path'], function (ind, val) {
+                            path += '/' + val.name;
+                        });
 
-                            html += "<tr>\
+                        path += '/';
+
+                        html += "<tr>\
                                     <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
                                         <i class='enso-orange-text material-icons'>lock_outline</i>\
                                     </td>\
@@ -83,22 +157,25 @@ var UserFolderView =
                                     <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
                                         <p>" + val['createdById'] + "</p>\
                                     </td>\
-                                    <td onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
-                                        <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
+                                    <td " + (val['username'] != "" ?
+                                            "onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
+                                            "class='not-clickable hide-on-med-and-down center-align") + "'>\
+                                        <p><i class='" + (val['username'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-user-label'></p>\
                                     </td >\
                                     <td onclick='UserFolderView.copyPassword(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
                                         <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-password-label'></p>\
                                     </td >\
-                                    <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='" + (val['url'] == "" ? "not-clickable " : "") + "hide-on-med-and-down center-align'>\
+                                    <td " + (val['url'] != "" ?
+                                        "onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
+                                        "class='not-clickable hide-on-med-and-down center-align") + "'>\
                                         <p><i class='" + (val['url'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>open_in_new</i></p>\
                                         <p style='font-size: 0.8em;' class='open-url-label'></p>\
                                     </td>\
                                 </tr>";
-
-                        }
                     });
+
                     html += "</tbody>";
 
                     $("#tabela-folders").html(html);
@@ -154,7 +231,7 @@ var UserFolderView =
             var username = "";
             CredentialActions.requestCredentialInfo(id, function (credentialInfo) {
                 username = credentialInfo['username'];
-            }, undefined, false);
+            }, function() {console.log("error copying username")}, false);
 
             var $temp = $("<input>");
             $("body").append($temp);
@@ -217,7 +294,7 @@ var UserFolderView =
             $('html,body').animate({ scrollTop: 0 }, 0);
             //Show / Hide add button
             if (id == null || id == "" || id == undefined) {
-                if (firstTime === undefined) {
+                if (firstTime == undefined) {
                     firstTime = false;
                     $("#top-bar").hide();
                 }
@@ -306,6 +383,11 @@ var UserFolderView =
             $('.modal').modal({
                 ready: ModalUtils.coverNavbar,
                 complete: function () {
+                    if (ensoConf.getUrlArgs() == null || ensoConf.getUrlArgs()['id'] == "" || ensoConf.getUrlArgs()['id'] == null)
+                        $("#current-folder").val(null);
+                    else
+                        $("#current-folder").val(ensoConf.getUrlArgs()['id']);
+
                     UserFolderView.loadFolderList();
                     ModalUtils.refreshTooltips();
 
@@ -316,6 +398,8 @@ var UserFolderView =
                         }, 300);
 
                     }
+
+
                 }
             });
         },
@@ -369,7 +453,7 @@ var UserFolderView =
                         if ($("#edit-url").val() == "")
                             $("#url-btn").hide();
                         $("#edit-credential-id").val(credentialInfo['idCredentials']);
-
+                        $("#current-folder").val(credentialInfo['belongsToFolder']);
                         Materialize.updateTextFields();
                         $('#edit-description').trigger('autoresize');
                     });

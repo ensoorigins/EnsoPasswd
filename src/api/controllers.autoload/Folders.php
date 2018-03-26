@@ -130,9 +130,7 @@ class Folders
 
             if ($infoFolder['parent'] == null) {
                 if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
-                    throw new RBACDeniedException();
-
-                PermissionModel::hasPermissionToSeeFolder($authusername, $id);
+                    PermissionModel::hasPermissionToSeeFolder($authusername, $id);
             } else
                 PermissionModel::hasPermissionToSeeFolder($authusername, $id);
 
@@ -181,11 +179,9 @@ class Folders
 
             if ($infoFolder['parent'] == null) {
                 if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
-                    throw new RBACDeniedException();
-                else
-                    PermissionModel::hasPermissionAdminFolder($authusername, $id);
+                    PermissionModel::hasPermissionToSeeFolder($authusername, $id);
             } else
-                PermissionModel::hasPermissionToAdminFolder($authusername, $id);
+                PermissionModel::hasPermissionToSeeFolder($authusername, $id);
 
             $children = FolderModel::getChildFoldersOnAllLevels($id);
 
@@ -364,13 +360,18 @@ class Folders
                 EnsoDebug::d("Can see folder");
                 EnsoDebug::var_error_log($folder);
 
+                $folderHits = 0;
+
                 foreach ($termos as $termo) {
                     if (strpos(strtolower($folder['name']), strtolower(trim($termo, "%"))) !== false) {
-                        $folder['credentialChildren'] = count(CredentialModel::getWhere(['belongsToFolder' => $folder['idFolders']]));
-                        $folder['folderChildren'] = count(FolderModel::getWhere(['parent' => $folder['idFolders']]));
-                        array_push($matchedFolders, $folder);
-                        break;
+                        $folderHits++;
                     }
+                }
+
+                if ($folderHits == count($termos)) {
+                    $folder['credentialChildren'] = count(CredentialModel::getWhere(['belongsToFolder' => $folder['idFolders']]));
+                    $folder['folderChildren'] = count(FolderModel::getWhere(['parent' => $folder['idFolders']]));
+                    array_push($matchedFolders, $folder);
                 }
 
                 foreach (CredentialModel::getMatchesBelongingTo($folder['idFolders'], $termos) as $cred) {
@@ -416,10 +417,12 @@ class Folders
         try {
             $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
-
+            $parent = null;
             $id = $request->getParam('folderId');
-            if ($id != null)
+            if ($id != null) {
                 $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
+                $parent = FolderModel::getWhere(['idFolders' => $id], ['parent'])[0]['parent'];
+            }
 
             $name = Input::validate($request->getParam('name'), Input::$STRICT_STRING, 2);
 
@@ -427,6 +430,8 @@ class Folders
                 throw new BadInputValidationException(1);
 
             $permissions = $request->getParam('permissions');
+
+            EnsoDebug::var_error_log($permissions);
 
             if (count($permissions) > 0)
                 foreach ($permissions as $userId => $hasAdmin)
@@ -437,7 +442,11 @@ class Folders
             if (!EnsoRBACModel::checkUserHasAction($authusername, 'seeFolderContents'))
                 throw new RBACDeniedException();
 
-            PermissionModel::hasPermissionToAdminFolder($authusername, $id);
+            if ($parent == null) {
+                if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageRootFolders'))
+                    PermissionModel::hasPermissionToAdminFolder($authusername, $id);
+            } else
+                PermissionModel::hasPermissionToAdminFolder($authusername, $id);
 
             FolderModel::editWhere(
                 [
@@ -448,14 +457,14 @@ class Folders
                 ]
             );
 
-            if (count($permissions) == 0) {
-                EnsoLogsModel::addEnsoLog($authusername, "Folder $id was created without permissions, is this a bug?", EnsoLogsModel::$ERROR, 'Folder');
-            } else {
-                PermissionModel::delete(["folder" => $id]);
+            if (count($permissions) == 0)
+                EnsoLogsModel::addEnsoLog($authusername, "Folder $id was edit without permissions, is this a bug?", EnsoLogsModel::$ERROR, 'Folder');
 
-                foreach ($permissions as $userId => $hasAdmin) {
-                    PermissionModel::insert(['folder' => $id, "hasAdmin" => $hasAdmin, "userId" => $userId]);
-                }
+
+            PermissionModel::delete(["folder" => $id]);
+
+            foreach ($permissions as $userId => $hasAdmin) {
+                PermissionModel::insert(['folder' => $id, "hasAdmin" => $hasAdmin, "userId" => $userId]);
             }
 
             EnsoLogsModel::addEnsoLog($authusername, "Edited folder $id.", EnsoLogsModel::$NOTICE, "Folder");
