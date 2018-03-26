@@ -32,19 +32,6 @@ var UserFolderView =
                         return a['title'].localeCompare(b['title']);
                     });
 
-                    /*
-                    var objectList = $.merge($.merge([], response['folders']), response['credentials']);
-
-                    var objectList = objectList.sort(function (a, b) {
-
-                        comparableA = (a['name'] === undefined ? a['title'] : a['name']);
-                        comparableB = (b['name'] === undefined ? b['title'] : b['name']);
-
-                        return comparableA.localeCompare(comparableB);
-                    });
-
-                    */
-
                     var html = "<thead>\
                                 <tr>\
                                     <th colspan='2'>Name</th>\
@@ -54,67 +41,6 @@ var UserFolderView =
                                 </tr>\
                             </thead>\
                             <tbody>";
-
-                    /*
-            $.each(objectList, function (key, val) {
-                if (val['name'] !== undefined) {
-                    html += "<tr onclick='ensoConf.goToPage(\"folders\", {id : " + val['idFolders'] + "})'>\
-                            <td>\
-                                <i class='enso-orange-text material-icons'>folder</i>\
-                            </td>\
-                            <td>\
-                                <span class='flow-text'>" + val['name'] + "</span>\
-                            </td>\
-                            <td class='hide-on-med-and-down' >\
-                                " + val['folderChildren'] + " <span class='folder-label'></span>; " + val['credentialChildren'] + " <span class='credential-label'></span> \
-                            </td>\
-                            <td class='hide-on-med-and-down' >\
-                                <p>" + val['createdById'] + "</p>\
-                            </td>\
-                            <td colspan='3' class='hide-on-med-and-down center-align'>\
-                            </td>\
-                        </tr>";
-                }
-                else {
-                    var path = "";
-
-                    $.each(val['path'], function (ind, val) {
-                        path += '/' + val.name;
-                    });
-
-                    path += '/';
-
-                    html += "<tr>\
-                            <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
-                                <i class='enso-orange-text material-icons'>lock_outline</i>\
-                            </td>\
-                            <td onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
-                                <span class='flow-text'>" + val['title'] + "</span>\
-                            </td>\
-                            <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
-                                " + path + "\
-                            </td>\
-                            <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
-                                <p>" + val['createdById'] + "</p>\
-                            </td>\
-                            <td onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
-                                <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
-                                <p style='font-size: 0.8em;' class='copy-user-label'></p>\
-                            </td >\
-                            <td onclick='UserFolderView.copyPassword(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align'>\
-                                <p><i class='enso-orange-text material-icons circle'>content_copy</i></p>\
-                                <p style='font-size: 0.8em;' class='copy-password-label'></p>\
-                            </td >\
-                            <td onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='" + (val['url'] == "" ? "not-clickable " : "") + "hide-on-med-and-down center-align'>\
-                                <p><i class='" + (val['url'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>open_in_new</i></p>\
-                                <p style='font-size: 0.8em;' class='open-url-label'></p>\
-                            </td>\
-                        </tr>";
-
-                }
-            });
-
-            */
 
                     $.each(sortedFolders, function (key, val) {
                         html += "<tr onclick='ensoConf.goToPage(\"folders\", {id : " + val['idFolders'] + "})'>\
