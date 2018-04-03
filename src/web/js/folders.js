@@ -54,7 +54,7 @@ var UserFolderView =
                                         " + val['folderChildren'] + " <span class='folder-label'></span>; " + val['credentialChildren'] + " <span class='credential-label'></span> \
                                     </td>\
                                     <td class='hide-on-med-and-down' >\
-                                        <p>" + val['createdById'] + "</p>\
+                                        <p></p>\
                                     </td>\
                                     <td colspan='3' class='hide-on-med-and-down center-align'>\
                                     </td>\
@@ -81,7 +81,7 @@ var UserFolderView =
                                         " + path + "\
                                     </td>\
                                     <td class='hide-on-med-and-down' onclick='UserFolderView.launchCredentialEditModal(" + val['idCredentials'] + ")'>\
-                                        <p>" + val['createdById'] + "</p>\
+                                        <p>" + val['username'] + "</p>\
                                     </td>\
                                     <td " + (val['username'] != "" ?
                                             "onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :

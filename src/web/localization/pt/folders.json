@@ -20,7 +20,7 @@
                         }
                 },
                 "created-by-pre-text": {
-                        "text": "Criada por: ",
+                        "text": "Nome de utilizador: ",
                         "applyTo": "class",
                         "attributes": {}
                 },

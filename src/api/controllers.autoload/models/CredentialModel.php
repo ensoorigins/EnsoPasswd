@@ -57,7 +57,7 @@ class CredentialModel extends Entity
 
     public static function getMatchesBelongingTo($belongsTo, $termos = ['%'])
     {
-        $sql = "SELECT idCredentials, title, createdById FROM " . static::$table . " " .
+        $sql = "SELECT idCredentials, title, createdById, username FROM " . static::$table . " " .
             "WHERE belongsToFolder = :belongsToFolder AND (";
 
         $values = array();

@@ -20,7 +20,7 @@
                         }
                 },
                 "created-by-pre-text": {
-                        "text": "Created by: ",
+                        "text": "Username: ",
                         "applyTo": "class",
                         "attributes": {}
                 },
