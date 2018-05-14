@@ -127,7 +127,7 @@ var MessageActions = {
             },
             url: pageUrl,
             success: function (response) {
-                response['password'] = EnsoShared.netwoletrkDecode(response['password']);
+                response['password'] = EnsoShared.networkDecode(response['password']);
 
                 if (successFunction !== undefined)
                     successFunction(response);
