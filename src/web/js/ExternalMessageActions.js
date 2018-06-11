@@ -7,6 +7,8 @@ var ExternalMessageActions = {
             dataType: "json",
             cache: false,
             data: {
+                authusername: Cookies.get('username'),
+                sessionkey: Cookies.get('sessionkey'),
                 externalKey: externalKey,
             },
             url: pageUrl,

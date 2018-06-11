@@ -6,11 +6,12 @@ var MessagesOutbox = {
             
             $.each(messages, function(key, val)
             {
-                html += "<li class='collection-item avatar enso-main-color-text' style='cursor:pointer' onclick='MessageModal.show(" + (val['receiverId'] === "External" ? "true" : "false") + ", true, " + val['idMessages'] + ")'>\
+                html += "<li class='collection-item avatar enso-main-color-text' style='cursor:pointer' onclick='MessageModal.show(" + (val['externalKey'] != undefined ?
+                            "true, true, \"" + val['idExternalMessage'] + "\"" :
+                            "false, true, \"" + val['idMessages'] + "\"") + ")'>\
                             <i class='material-icons circle'>mail</i>\
-                            <span class='title'>Partilha de credencial \"" + val['title'] + "\"</span>\
-                            <p>Partilhada para " + val['receiverId'] + "\
-                            </p>\
+                            <span class='title'>Partilha de credencial \"" + val['title'] + "\"</span>" + 
+                            (key['senderId'] != undefined ? "<p>Partilhada para " + val['receiverId'] + "</p>" :  "<p>Mensagem externa</p>") + "\
                         </li>";
             });
             

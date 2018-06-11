@@ -167,11 +167,15 @@ class Messages
 
             self::deleteDeadMessages();
 
-            $outbox = MessageModel::getWhere(
+            $outbox = array_merge(MessageModel::getWhere(
                 [
                     "senderId" => $authusername
                 ]
-            );
+            ), ExternalMessageModel::getWhere(
+                [
+                    "senderId" => $authusername
+                ]
+            ));
 
             EnsoLogsModel::addEnsoLog($authusername, "Consulted outbox", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
@@ -275,10 +279,10 @@ class Messages
 
                 if ($response->getStatusCode() !== EnsoShared::$ENSO_REST_OK)
                     return $response;
-                    else {
-                        $response->getBody()->rewind();
-                        $credential = json_decode($response->getBody()->getContents());
-                    }
+                else {
+                    $response->getBody()->rewind();
+                    $credential = json_decode($response->getBody()->getContents());
+                }
             }
 
         /* Credencial bem inserida vou eliminar mensagem  */
@@ -350,17 +354,29 @@ class Messages
     public static function getExternalMessage($request, $response, $args)
     {
         try {
-
             $externalKey = Input::validate($request->getParam('externalKey'), Input::$STRING, 0, ExternalMessageModel::class, 'externalKey');
+
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
             $message = ExternalMessageModel::getWhere(['externalKey' => $externalKey])[0];
 
+            try {
+                AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+                if ($authusername != $message['senderId'] && $message['belongsToFolder'] === null) {
+                    ExternalMessageModel::delete(['externalKey' => $externalKey]);
+                    CredentialModel::delete(['idCredentials' => $message['referencedCredential']]);
+                }
+            } catch (AuthenticationException $e) {
+                {
+                    ExternalMessageModel::delete(['externalKey' => $externalKey]);
+                    if ($message['belongsToFolder'] === null)
+                        CredentialModel::delete(['idCredentials' => $message['referencedCredential']]);
+                }
+            }
+
             EnsoLogsModel::addEnsoLog("external", "Consulted message with key $externalKey", EnsoLogsModel::$INFORMATIONAL, "External Messages");
-
-            ExternalMessageModel::delete(['externalKey' => $externalKey]);
-
-            if ($message['belongsToFolder'] === null)
-                CredentialModel::delete(['idCredentials' => $message['referencedCredential']]);
 
             ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $message);
         } catch (BadInputValidationException $e) {
@@ -383,7 +399,7 @@ class Messages
                 $receiver = Input::validate($receiver, Input::$EMAIL, 4);
 
             $credential = $request->getParam('referencedCredential');
-            if ($credential === null)
+            if ($credential !== null)
                 $credential = Input::validate($credential, Input::$INT, 2, CredentialModel::class, 'idCredentials');
 
             $message = $request->getParam('message');
@@ -391,6 +407,9 @@ class Messages
                 $message = Input::validate($message, Input::$STRING);
 
             $timeToDie = $request->getParam('timeToDie');
+
+            EnsoDebug::var_error_log($timeToDie);
+
             switch ($timeToDie) {
                 case "+6 hours":
                 case "+12 hours":
@@ -398,6 +417,7 @@ class Messages
                 case "+7 days":
                     break;
                 default:
+                    EnsoDebug::d("exited");
                     throw new BadInputValidationException("bad timetodie", 3);
             }
 
@@ -420,16 +440,16 @@ class Messages
 
                 if ($response->getStatusCode() !== EnsoShared::$ENSO_REST_OK)
                     return $response;
-                    else {
-                        $response->getBody()->rewind();
-                        $credential = json_decode($response->getBody()->getContents());
-                    }
+                else {
+                    $response->getBody()->rewind();
+                    $credential = json_decode($response->getBody()->getContents());
+                }
             }
 
 
             $externalKey = ExternalMessageModel::insert([
                 "message" => $message,
-                "timeToDie" => $timeToDie,
+                "timeToDie" => strtotime($timeToDie),
                 "referencedCredential" => $credential,
                 "senderId" => $authusername
             ]);
