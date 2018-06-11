@@ -98,6 +98,8 @@ var LocalizationManager =
                 LocalizationManager.applyLocaleSettingsToGivenView('app-wide');
                 //apply currentView settings
                 LocalizationManager.applyLocaleSettingsToGivenView(ensoConf.getCurrentPage());
+
+                ModalUtils.refreshTooltips();
             },
             getEnumFromView: function (view, enumerator)
             {

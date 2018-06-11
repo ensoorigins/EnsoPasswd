@@ -21,7 +21,8 @@ class Credentials
                 $belongsTo = Input::validate($belongsTo, Input::$INT, 5, FolderModel::class, 'idFolders');
 
             $title = Input::validate($request->getParam('title'), Input::$STRICT_STRING, 2);
-            if (CredentialModel::exists(
+
+            if ($belongsTo != NULL && CredentialModel::exists(
                 [
                     'title' => $title,
                     'belongsToFolder' => $belongsTo

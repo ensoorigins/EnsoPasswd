@@ -1,8 +1,6 @@
 if (firstTime === undefined)
     var firstTime = undefined;
 
-console.log(firstTime);
-
 var UserFolderView =
     {
         _openLastCredential: undefined,
@@ -84,8 +82,8 @@ var UserFolderView =
                                         <p>" + val['username'] + "</p>\
                                     </td>\
                                     <td " + (val['username'] != "" ?
-                                            "onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
-                                            "class='not-clickable hide-on-med-and-down center-align") + "'>\
+                                "onclick='UserFolderView.copyUsername(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
+                                "class='not-clickable hide-on-med-and-down center-align") + "'>\
                                         <p><i class='" + (val['username'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>content_copy</i></p>\
                                         <p style='font-size: 0.8em;' class='copy-user-label'></p>\
                                     </td >\
@@ -94,8 +92,8 @@ var UserFolderView =
                                         <p style='font-size: 0.8em;' class='copy-password-label'></p>\
                                     </td >\
                                     <td " + (val['url'] != "" ?
-                                        "onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
-                                        "class='not-clickable hide-on-med-and-down center-align") + "'>\
+                                "onclick='UserFolderView.openUrl(" + val['idCredentials'] + ")' class='hide-on-med-and-down center-align" :
+                                "class='not-clickable hide-on-med-and-down center-align") + "'>\
                                         <p><i class='" + (val['url'] == "" ? "grey-text " : "enso-orange-text ") + "material-icons circle'>open_in_new</i></p>\
                                         <p style='font-size: 0.8em;' class='open-url-label'></p>\
                                     </td>\
@@ -157,7 +155,7 @@ var UserFolderView =
             var username = "";
             CredentialActions.requestCredentialInfo(id, function (credentialInfo) {
                 username = credentialInfo['username'];
-            }, function() {console.log("error copying username")}, false);
+            }, function () { console.log("error copying username") }, false);
 
             var $temp = $("<input>");
             $("body").append($temp);
@@ -257,6 +255,8 @@ var UserFolderView =
                                 $("#edit-folder-icon").hide();
                                 $("#main-content").append(UserFolderView.getCredentialOnlyFabHtml());
                             }
+
+                            $('.tooltipped').tooltip();
                         }
                     });
                     if (!userHasPermission) {
@@ -268,6 +268,11 @@ var UserFolderView =
             UserFolderView.changeCurrentFolder(id);
             UserFolderView.loadFolderList();
         },
+
+        preventProp: function (event) {
+            event.stopImmediatePropagation();
+        },
+
         launchFolderAddModal: function () {
             var pageUrl = ensoConf.viewsPath + "modal_folders_add_folder.html";
             $.ajax({
@@ -278,6 +283,11 @@ var UserFolderView =
                 success: function (response) {
                     $('#folder-modal').empty().append(response);
                     $('#folder-modal').modal('open');
+                    $("#folder-modal").find("input, textarea").on({
+                        input: UserFolderView.preventProp,
+                        keydown: UserFolderView.preventProp,
+                        keyup: UserFolderView.preventProp,
+                        keypress: UserFolderView.preventProp});
 
                     FolderActions.requestFolderInfo(UserFolderView.getCurrentFolder(), function (folderInfo) {
                         FolderModal.parsePermissionsAndAddToModal(folderInfo['permissions']);
@@ -299,6 +309,11 @@ var UserFolderView =
                     response = response.replace('{RandomName}', 'name="' + PasswordUtil.generate(16, true, true, true, false) + '"');
                     $('#folder-modal').html(response);
                     $('#folder-modal').modal('open');
+                    $("#folder-modal").find("input, textarea").on({
+                        input: UserFolderView.preventProp,
+                        keydown: UserFolderView.preventProp,
+                        keyup: UserFolderView.preventProp,
+                        keypress: UserFolderView.preventProp});
                 },
                 error: function (response) {
                     ensoConf.switchApp(ensoConf.defaultApp);
@@ -342,6 +357,11 @@ var UserFolderView =
 
                     $('#folder-modal').html(response);
                     $('#folder-modal').modal('open');
+                    $("#folder-modal").find("input, textarea").on({
+                        input: UserFolderView.preventProp,
+                        keydown: UserFolderView.preventProp,
+                        keyup: UserFolderView.preventProp,
+                        keypress: UserFolderView.preventProp});
 
                     FolderActions.requestFolderInfo(UserFolderView.getCurrentFolder(), function (folderInfo) {
                         FolderModal.parsePermissionsAndAddToModal(folderInfo['permissions']);
@@ -369,6 +389,11 @@ var UserFolderView =
                 success: function (response) {
                     $('#folder-modal').empty().append(response);
                     $('#folder-modal').modal('open');
+                    $("#folder-modal").find("input, textarea").on({
+                        input: UserFolderView.preventProp,
+                        keydown: UserFolderView.preventProp,
+                        keyup: UserFolderView.preventProp,
+                        keypress: UserFolderView.preventProp});
 
                     CredentialActions.requestCredentialInfo(id, function (credentialInfo) {
                         $("#edit-title").val(credentialInfo['title']);
@@ -500,6 +525,6 @@ UserFolderView.loadFolder(ensoConf.getUrlArgs() == null ? null : ensoConf.getUrl
 attachSearchAction(UserFolderView.loadFolderList);
 UserFolderView.initModals();
 LocalizationManager.applyLocaleSettings();
-$('.tooltipped').tooltip({ delay: 50 });
+$('.tooltipped').tooltip();
 
 //# sourceURL=folders.js

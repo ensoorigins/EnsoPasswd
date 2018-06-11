@@ -8,7 +8,7 @@ class Authentication
 
 
             if (file_exists("../setup/")) {
-                return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
+                //return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, 1);
             }
 
             $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel::class, 'username');
@@ -51,8 +51,6 @@ class Authentication
         } catch (Exception $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
-
-
     }
 }
 

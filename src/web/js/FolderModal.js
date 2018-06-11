@@ -123,13 +123,7 @@ var FolderModal =
                     });
                 },
                 error: function (response) {
-
-                    console.log(response);
                     dealWithErrorStatusCodes(response, undefined);
-
-
-
-                    //ensoConf.switchApp(ensoConf.defaultApp);
                 }
             });
         }
