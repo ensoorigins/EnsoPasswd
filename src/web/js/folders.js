@@ -256,7 +256,8 @@ var UserFolderView =
                                 $("#main-content").append(UserFolderView.getCredentialOnlyFabHtml());
                             }
 
-                            $('.tooltipped').tooltip();
+                            LocalizationManager.applyLocaleSettings();
+                            ModalUtils.refreshTooltips();
                         }
                     });
                     if (!userHasPermission) {
