@@ -163,9 +163,9 @@ $(document).ready(function () {
     checkCredentials();
 
     ensoConf.addAfterViewCallback(updateInboxCount);
-    ensoConf.addAfterViewCallback(function () {
-        $("#pesquisa-desktop").val("").trigger('input');
-        $("#pesquisa-mobile").val("").trigger("input");
+    ensoConf.addBeforeViewCallback(function () {
+        $("#pesquisa-desktop").val("");
+        $("#pesquisa-mobile").val("");
     });
 
     $('.dropdown-button').dropdown({

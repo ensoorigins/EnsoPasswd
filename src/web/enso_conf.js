@@ -3,6 +3,7 @@ var ensoConf = {
 	defaultApp: "login",
 	viewsPath: "views/",
 	afterViewCallBacks: [],
+	beforeViewCallBacks: [],
 
 	navigateToPage: function () {
 		if (ensoConf.getCurrentPage() != "") {
@@ -14,6 +15,9 @@ var ensoConf = {
 				cache: false,
 				url: pageUrl,
 				success: function (response) {
+					$.each(ensoConf.beforeViewCallBacks, function (index, callBack) {
+						callBack();
+					});
 					$("#main-content").empty().append(response);
 					$.each(ensoConf.afterViewCallBacks, function (index, callBack) {
 						callBack();
@@ -36,7 +40,7 @@ var ensoConf = {
 			});
 		}
 
-		if(newHash == window.location.hash && forceReload === true)
+		if (newHash == window.location.hash && forceReload === true)
 			$(window).trigger('hashchange');
 		else
 			window.location.hash = newHash;
@@ -150,6 +154,17 @@ var ensoConf = {
 
 		if (index > -1)
 			ensoConf.afterViewCallBacks.splice(index, 1);
+	},
+
+	addBeforeViewCallback: function (arg) {
+		ensoConf.beforeViewCallBacks.push(arg);
+	},
+
+	removeBeforeViewCallback: function (arg) {
+		index = ensoConf.beforeViewCallBacks.indexOf(arg);
+
+		if (index > -1)
+			ensoConf.beforeViewCallBacks.splice(index, 1);
 	},
 
 	init: function () {
