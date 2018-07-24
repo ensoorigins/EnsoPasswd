@@ -14,6 +14,8 @@ function performLogin() {
             ensoConf.switchApp('passwd');
         },
         error: function (response) {
+            if (response.status == EnsoShared.ENSO_REST_NOT_AUTHORIZED)
+                Materialize.toast('Autenticação falhada.', 3000, 'rounded');
         }
     });
 }
