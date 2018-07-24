@@ -260,7 +260,7 @@ class Users
             $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-            $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel, 'username');
+            $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel::Class, 'username');
 
             AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
@@ -273,9 +273,9 @@ class Users
             $msgsOut = MessageModel::getWhere(['sender' => $username]);
             $extMsgsOut = ExternalMessageModel::getWhere(['sender' => $username]);
 
-            MessageModel::delete(['receiver' => $username]);
-            MessageModel::delete(['sender' => $username]);
-            ExternalMessageModel::delete(['sender' => $username]);
+            MessageModel::delete(['receiverId' => $username]);
+            MessageModel::delete(['senderId' => $username]);
+            ExternalMessageModel::delete(['senderId' => $username]);
 
             foreach ($msgsIn as $value) {
                 if ($value['belongsToFolder'] == null)
