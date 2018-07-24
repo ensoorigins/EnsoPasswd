@@ -30,7 +30,10 @@ class Authentication
 
         } catch (PermissionDeniedException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
     }
