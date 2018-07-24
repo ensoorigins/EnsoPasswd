@@ -250,12 +250,6 @@ input:not([type="checkbox"]):not([type="radio"]){
     color: black;
 }
 
-#loader{
-    position: absolute;
-    top: 50vh;
-    left: 50vw;
-}
-
 #tabela-folders tr td p:first-child {
     margin-top: 0px;
 }
