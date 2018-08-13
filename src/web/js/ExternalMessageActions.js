@@ -1,6 +1,6 @@
 var ExternalMessageActions = {
     getExternalMessage: function (externalKey, successFunction = undefined, failFunction = undefined) {
-        var pageUrl =REST_SERVER_PATH + "externalMessage/";
+        var pageUrl = REST_SERVER_PATH + "externalMessage/";
 
         $.ajax({
             type: "GET",

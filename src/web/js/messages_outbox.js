@@ -1,7 +1,8 @@
 var MessagesOutbox = {
     loadOutbox: function(){
         MessageActions.getOutbox(function(messages)
-        {            
+        {
+            console.log(messages);            
             var html = " <ul class='collection'>";
             
             $.each(messages, function(key, val)
@@ -11,7 +12,7 @@ var MessagesOutbox = {
                             "false, true, \"" + val['idMessages'] + "\"") + ")'>\
                             <i class='material-icons circle'>mail</i>\
                             <span class='title'>Partilha de credencial \"" + val['title'] + "\"</span>" + 
-                            (key['senderId'] != undefined ? "<p>Partilhada para " + val['receiverId'] + "</p>" :  "<p>Mensagem externa</p>") + "\
+                            (val['receiverId'] != undefined ? "<p>Partilhada para " + val['receiverId'] + "</p>" :  "<p>Mensagem externa</p>") + "\
                         </li>";
             });
             
