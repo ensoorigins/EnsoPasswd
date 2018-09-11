@@ -1,27 +1,31 @@
 function performLogin() {
     var pageUrl = REST_SERVER_PATH + "auth/";
     $.ajax({
-        type: "GET",
+        type: "POST",
         dataType: "json",
         cache: false,
         data: { username: $("#edit-username-login").val(), password: $("#edit-password-login").val() },
         url: pageUrl,
         success: function (response) {
-            loginInvalid = false;
-            Cookies.set('sessionkey', response['sessionkey']);
-            Cookies.set('actions', response['actions']);
-            Cookies.set('username', response['username']);
-            ensoConf.switchApp('passwd');
+            loginInvalid = true;
+            if (logginIn) {
+                Cookies.set('sessionkey', response['sessionkey']);
+                Cookies.set('actions', response['actions']);
+                Cookies.set('username', response['username']);
+                ensoConf.switchApp('passwd');
+            }
         },
         error: function (response) {
-            if (response.status == EnsoShared.ENSO_REST_NOT_AUTHORIZED)
+            if (response.status == EnsoShared.ENSO_REST_NOT_AUTHORIZED) {
                 Materialize.toast('Autenticação falhada.', 3000, 'rounded');
+                loginInvalid = true;
+            }
         }
     });
 }
 
 function validateSession() {
-    var valid = false;
+    loginInvalid = true;
 
     var pageUrl = REST_SERVER_PATH + "validity/";
     $.ajax({
@@ -33,14 +37,14 @@ function validateSession() {
         url: pageUrl,
         success: function (response) {
             if (response == "1")
-                valid = true;
+                loginInvalid = false;
 
         },
         error: function (response) {
         }
     });
 
-    return valid;
+    return !loginInvalid;
 }
 
 function checkCredentials() {
@@ -63,11 +67,15 @@ function browserHasGoodCookies() {
     return Cookies.get('sessionkey') !== undefined && Cookies.get('actions') !== undefined && Cookies.get('username') !== undefined;
 }
 
+var loginInvalid = true;
+var logginIn = false;
+
 $(document).ready(function () {
     checkCredentials();
     $("input").keypress(function (event) {
 
-        if (event.keyCode == 13) {
+        if (event.keyCode == 13 && !logginIn) {
+            logginIn = true;
             performLogin();
         }
     });

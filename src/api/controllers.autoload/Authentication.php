@@ -28,6 +28,8 @@ class Authentication
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["sessionkey" => $auth_key, "actions" => $actions, "username" => $username]);
 
+        } catch (InputException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (PermissionDeniedException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (AuthenticationException $e) {
@@ -57,5 +59,5 @@ class Authentication
     }
 }
 
-$app->get('/auth/', 'Authentication::attemptLogin');
+$app->post('/auth/', 'Authentication::attemptLogin');
 $app->get('/validity/', 'Authentication::checkValidity');
