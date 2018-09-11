@@ -205,6 +205,4 @@ var MessageModal = {
     userOnCancel: undefined
 };
 
-LocalizationManager.applyLocaleSettingsToGivenView('message_modal')
-
 //# sourceURL=MessageModal.js

@@ -56,11 +56,11 @@
     <div class="modal-footer">
         <div class="row" style="margin: 0">
             <div class="col s12">
-                <a class="btn waves-effect waves-light grey accent-4 tooltipped" id="message-modal-cancel-button" data-position="top" data-delay="50" name="action" onclick=" $('#message-modal').modal('close');"><i class="material-icons">clear</i>
+                <a class="btn waves-effect waves-light tooltipped" id="message-modal-cancel-button" data-position="top" data-delay="50" name="action" onclick=" $('#message-modal').modal('close');"><i class="material-icons">clear</i>
                 </a>
-                <a class="btn waves-effect waves-light enso-main-color accent-4 tooltipped" id="message-modal-save-button" data-position="top" data-delay="50" name="action" onClick="MessageModal.createCredential()"><i class="material-icons">save</i>
+                <a class="btn waves-effect waves-light confirm-button tooltipped" id="message-modal-save-button" data-position="top" data-delay="50" name="action" onClick="MessageModal.createCredential()"><i class="material-icons">save</i>
                 </a>
-                <a class="btn waves-effect waves-light red accent-4 left tooltipped" id="message-modal-remove-button" data-position="top" data-delay="50" name="action" onClick="ConfirmationModal.show(LocalizationManager.getStringFromView('message_modal', 'remove-confirmation'), MessageModal.removeMessage, undefined, 'message-modal')"><i class="material-icons">delete</i>
+                <a class="btn waves-effect waves-light left tooltipped" id="message-modal-remove-button" data-position="top" data-delay="50" name="action" onClick="ConfirmationModal.show(LocalizationManager.getStringFromView('message_modal', 'remove-confirmation'), MessageModal.removeMessage, undefined, 'message-modal')"><i class="material-icons">delete</i>
                 </a>
             </div>
         </div>
