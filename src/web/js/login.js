@@ -18,8 +18,9 @@ function performLogin() {
         error: function (response) {
             if (response.status == EnsoShared.ENSO_REST_NOT_AUTHORIZED) {
                 Materialize.toast('Autenticação falhada.', 3000, 'rounded');
-                loginInvalid = true;
             }
+            loginInvalid = true;
+            logginIn = false;
         }
     });
 }
