@@ -192,8 +192,8 @@ var ShareModal = {
                                 $("#share-modal").find('.modal-footer').empty();
                                 $("#share-modal").find('.modal-content').empty().append(
                                     "<i class='material-icons right' style='cursor:pointer' onclick='$(\"#share-modal\").modal(\"close\")'>close</i>\
-                                        <p style='clear: both'>" + LocalizationManager.getStringFromView('share_modal', 'external-share-success') + "</p>\n\
-                                         <p id='external-link'>" + FRONT_SERVER_PATH + "#!external_link?externalKey=" + externalKey + "</p>\n\
+                                        <p style='clear: both'>" + (externalKey.sent ? LocalizationManager.getStringFromView('share_modal', 'external-share-success') : LocalizationManager.getStringFromView('share_modal', 'external-share-fail'))  + "</p>\n\
+                                         <p id='external-link'>" + FRONT_SERVER_PATH + "#!external_link?externalKey=" + externalKey.externalKey + "</p>\n\
                                          <p><i class='material-icons' style='cursor:pointer;' onclick='ShareModal.copyExternalLink()'>content_copy</i></p>");
                             }
                     );

@@ -75,7 +75,8 @@
                         },
                         "strings": 
                 {
-                    "external-share-success" : "You share link is:"
+                    "external-share-success" : "An email has been sent to infor the user the credential has been shared. For safety here is the link sent: ",
+                    "external-share-fail" : "No email has been sent, here is the link to the credential, please keep this safe : "
                 }
             }
 }

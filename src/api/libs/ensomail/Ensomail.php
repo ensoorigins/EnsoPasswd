@@ -31,7 +31,7 @@ class Ensomail {
 		
 		// Send the message
 		$result = $mailer->send($message);
-		if($result != sizeof($toMail))
+		if($result == 0)
 			return false;
 		
 		return true;

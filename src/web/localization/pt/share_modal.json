@@ -43,7 +43,8 @@
                         }
                 },
                 "strings": {
-                        "external-share-success": "O seu link de partilha é:"
+                        "external-share-success": "Foi enviado um email de notificação, o link enviado foi: ",
+                        "external-share-fail" : "Nenhum e-mail foi enviado aqui está o link gerado: "
                 }
         }
 }

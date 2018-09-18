@@ -458,12 +458,13 @@ class Messages
 
             global $ensoMailConfig;
 
+            $mailSuccess = false;
             if ($receiver != "")
-                Ensomail::sendMail($ensoMailConfig["from"], $receiver, "Notificação de Credencial", $serverpath . $externalKey);
+                $mailSuccess = Ensomail::sendMail($ensoMailConfig["from"], $receiver, "Notificação de Credencial", $serverpath . $externalKey);
 
         /* 5. response */
 
-            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $externalKey);
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, [ "externalKey" => $externalKey, "sent" => $mailSuccess ]);
         } catch (BadInputValidationException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
         } catch (PermissionDeniedException $e) {
