@@ -19,9 +19,8 @@ var SysAdminFolderManagement =
                     var html = "<thead>\
                                 <tr>\
                                     <th colspan='2'>Name</th>\
-                                    <th>Description</th>\
-                                    <th class='created-by-pre-text'></th>\
-                                    <th colspan='3'></th>\
+                                    <th class='hide-on-med-and-down'>Description</th>\
+                                    <th class='hide-on-med-and-down' class='created-by-pre-text'></th>\
                                 </tr>\
                             </thead>\
                             <tbody>";
@@ -38,13 +37,11 @@ var SysAdminFolderManagement =
                                     <td>\
                                         <span class='flow-text'>" + val['name'] + "</span>\
                                     </td>\
-                                    <td>\
+                                    <td class='hide-on-med-and-down'>\
                                         " + val['folderChildren'] + " <span class='folder-label'></span>; " + val['credentialChildren'] + " <span class='credential-label'></span> \
                                     </td>\
-                                    <td>\
+                                    <td class='hide-on-med-and-down'>\
                                         <p>" + val['createdById'] + "</p>\
-                                    </td>\
-                                    <td colspan='3'>\
                                     </td>\
                                 </tr>";
                     });
