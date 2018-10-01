@@ -148,6 +148,14 @@ $(document).ready(function () {
         e.stopPropagation();
     });
 
+    $("#pesquisa-mobile").keypress(function (e) {
+        e.stopPropagation();
+        if (e.keyCode === 13) {
+            $("#mobile-menu").sideNav('hide');
+            $("#pesquisa-mobile").blur();
+        }
+    });
+
     $("#pesquisa-desktop").on("focusin", function () {
         $("#pesquisa-desktop").css("width", "calc(100% - 4em - 42px)");
         $("#pesquisa-desktop").parent().attr("style", "background-color: white !important");
@@ -192,9 +200,9 @@ $(document).ready(function () {
     }
 
     window.onkeydown = function (e) {
-        if($(".modal.open").length !== 0)
+        if ($(".modal.open").length !== 0)
             return;
-            
+
         keys[e.keyCode] = true;
 
         if ((isKey(91) || isKey(93) || isKey(224) || isKey(17)) && (e.keyCode == 83 || e.keyCode == 70)) {
