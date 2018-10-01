@@ -22,7 +22,8 @@ class Folders
 
             $listaDeFolders = FolderModel::getWhere(
                 [
-                    'parent' => ["IS", null]
+                    'parent' => ["IS", null],
+                    'name' => ['LIKE', $string]
                 ]
             );
 
