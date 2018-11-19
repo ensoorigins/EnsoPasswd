@@ -1,93 +1,109 @@
 var CredentialModal =
-        {
-            isEditMode: null,
+{
+    isEditMode: null,
+    timeoutId: undefined,
 
-            enableLookMode: function ()
-            {
-                $("#edit-title").prop('disabled', true);
-                $("#edit-username").prop('disabled', true);
-                $("#edit-password").prop('disabled', true);
-                $("#edit-description").prop('disabled', true);
-                $("#edit-url").prop('disabled', true);
+    enableLookMode: function () {
+        $("#edit-title").prop('disabled', true);
+        $("#edit-username").prop('disabled', true);
+        $("#edit-password").prop('disabled', true);
+        $("#edit-description").prop('disabled', true);
+        $("#edit-url").prop('disabled', true);
 
-                $("#edit-title").addClass("readonly");
-                $("#edit-username").addClass("readonly");
-                $("#edit-password").addClass("readonly");
-                $("#edit-description").addClass("readonly");
-                $("#edit-url").addClass("readonly");
+        $("#edit-title").addClass("readonly");
+        $("#edit-username").addClass("readonly");
+        $("#edit-password").addClass("readonly");
+        $("#edit-description").addClass("readonly");
+        $("#edit-url").addClass("readonly");
 
-                $("#edit-generate-password").hide();
+        $("#edit-generate-password").hide();
 
-                $(".modal-footer").hide();
+        $(".modal-footer").hide();
 
-                $("#view-mode").text("lock_outline");
-                $("#view-mode").attr("data-tooltip", LocalizationManager.getEnumFromView('credential_modal', 'lockButtonState')['locked']);
-                $('#view-mode').tooltip({delay: 50});
+        $("#view-mode").text("lock_outline");
+        $("#view-mode").attr("data-tooltip", LocalizationManager.getEnumFromView('credential_modal', 'lockButtonState')['locked']);
+        $('#view-mode').tooltip({ delay: 50 });
 
-                CredentialModal.isEditMode = false;
-            },
+        CredentialModal.isEditMode = false;
+    },
 
-            enableEditMode: function ()
-            {
-                $("#edit-title").prop('disabled', false);
-                $("#edit-username").prop('disabled', false);
-                $("#edit-password").prop('disabled', false);
-                $("#edit-description").prop('disabled', false);
-                $("#edit-url").prop('disabled', false);
-                $("#edit-title").focus();
+    enableEditMode: function () {
+        $("#edit-title").prop('disabled', false);
+        $("#edit-username").prop('disabled', false);
+        $("#edit-password").prop('disabled', false);
+        $("#edit-description").prop('disabled', false);
+        $("#edit-url").prop('disabled', false);
+        $("#edit-title").focus();
 
-                $("#edit-title").removeClass("readonly");
-                $("#edit-username").removeClass("readonly");
-                $("#edit-password").removeClass("readonly");
-                $("#edit-description").removeClass("readonly");
-                $("#edit-url").removeClass("readonly");
+        $("#edit-title").removeClass("readonly");
+        $("#edit-username").removeClass("readonly");
+        $("#edit-password").removeClass("readonly");
+        $("#edit-description").removeClass("readonly");
+        $("#edit-url").removeClass("readonly");
 
-                $("#edit-generate-password").show();
+        $("#edit-generate-password").show();
 
-                $(".modal-footer").show();
+        $(".modal-footer").show();
 
-                $("#view-mode").text("lock_open");
-                $("#view-mode").attr("data-tooltip", LocalizationManager.getEnumFromView('credential_modal', 'lockButtonState')['unlocked']);
-                $('#view-mode').tooltip({delay: 50});
+        $("#view-mode").text("lock_open");
+        $("#view-mode").attr("data-tooltip", LocalizationManager.getEnumFromView('credential_modal', 'lockButtonState')['unlocked']);
+        $('#view-mode').tooltip({ delay: 50 });
 
-                CredentialModal.isEditMode = true;
-            },
+        CredentialModal.isEditMode = true;
+    },
 
-            switchViewMode: function ()
-            {
-                if (CredentialModal.isEditMode)
-                    CredentialModal.enableLookMode();
-                else
-                    CredentialModal.enableEditMode();
-            },
+    switchViewMode: function () {
+        if (CredentialModal.isEditMode)
+            CredentialModal.enableLookMode();
+        else
+            CredentialModal.enableEditMode();
+    },
 
-            copyPasswordToClipboard: function ()
-            {
-                var $temp = $("<input>");
-                $("body").append($temp);
-                $temp.val($("#edit-password").val()).select();
-                document.execCommand("copy");
-                $temp.remove();
-                Materialize.toast(LocalizationManager.getStringFromView('credential_modal', "password-copy"), 2000);
-            },
+    copyPasswordToClipboard: function () {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($("#edit-password").val()).select();
+        document.execCommand("copy");
+        $temp.remove();
+        Materialize.toast(LocalizationManager.getStringFromView('credential_modal', "password-copy"), 2000);
+    },
 
-            copyUsernameToClipboard: function ()
-            {
-                var $temp = $("<input>");
-                $("body").append($temp);
-                $temp.val($("#edit-username").val()).select();
-                document.execCommand("copy");
-                $temp.remove();
-                Materialize.toast(LocalizationManager.getStringFromView('credential_modal', "user-copy"), 2000);
-            },
+    copyUsernameToClipboard: function () {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($("#edit-username").val()).select();
+        document.execCommand("copy");
+        $temp.remove();
+        Materialize.toast(LocalizationManager.getStringFromView('credential_modal', "user-copy"), 2000);
+    },
 
-            openUrl: function ()
-            {
-                var win = window.open($("#edit-url").val(), '_blank');
-                win.focus();
-            }
+    openUrl: function () {
+        var win = window.open($("#edit-url").val(), '_blank');
+        win.focus();
+    },
 
+    togglePasswordView() {
+        if ($('#edit-password').attr('type') == "text")
+            CredentialModal._deactivatePasswordPlainText();
+        else
+            CredentialModal._activatePasswordPlainText();
+    },
 
-        };
+    _deactivatePasswordPlainText() {
+        $('#edit-password').clone().attr('type', 'password').insertAfter('#edit-password').prev().remove();
+
+        if (CredentialModal.timeoutId)
+            clearTimeout(CredentialModal.timeoutId);
+    },
+
+    _activatePasswordPlainText() {
+        $('#edit-password').clone().attr('type', 'text').insertAfter('#edit-password').prev().remove();
+
+        CredentialModal.timeoutId = setTimeout(CredentialModal._deactivatePasswordPlainText, 30000);
+
+        if ($('#edit-password').val().trim().length != 0)
+            $('#edit-password').removeClass('invalid').addClass('valid');
+    }
+};
 
         //# sourceURL=modal_folders_edit_credential.js

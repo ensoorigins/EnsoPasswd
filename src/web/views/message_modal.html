@@ -20,7 +20,7 @@
                         <label for="edit-password" id="password-label"></label>
                         <i class="material-icons right" id="edit-generate-password" onclick="$('#edit-password').val(PasswordUtil.generate(16))">refresh</i>
 
-                        <i class="material-icons right" id="edit-look" onmousedown="$('#edit-password').clone().attr('type', 'text').insertAfter('#edit-password').prev().remove();" onmouseup="$('#edit-password').clone().attr('type', 'password').insertAfter('#edit-password').prev().remove();">remove_red_eye</i>
+                        <i class="material-icons right" id="edit-look" onclick="CredentialModal.togglePasswordView()">remove_red_eye</i>
                         <i class="material-icons right" onclick="CredentialModal.copyPasswordToClipboard()">content_copy</i>
                     </div>         
                     <div class="input-field col s12" style="height: 5em !important">
