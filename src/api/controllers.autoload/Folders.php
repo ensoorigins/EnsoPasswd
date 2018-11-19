@@ -358,9 +358,6 @@ class Folders
             try {
                 PermissionModel::hasPermissionToSeeFolder($authusername, $folder['idFolders']);
 
-                EnsoDebug::d("Can see folder");
-                EnsoDebug::var_error_log($folder);
-
                 $folderHits = 0;
 
                 foreach ($termos as $termo) {

@@ -63,7 +63,7 @@ class CredentialModel extends Entity
         $values = array();
 
         foreach ($termos as $key => $termo) {
-            $sql .= "(LCASE(title) LIKE LCASE(:search$key) OR LCASE(description) LIKE LCASE(:search$key) OR LCASE(url) LIKE LCASE(:search$key)) AND ";
+            $sql .= "(LCASE(title) LIKE LCASE(:search$key) OR LCASE(description) LIKE LCASE(:search$key) OR LCASE(url) LIKE LCASE(:search$key) OR LCASE(username) LIKE LCASE(:search$key)) AND ";
             $values['search' . $key] = $termo;
         }
 
