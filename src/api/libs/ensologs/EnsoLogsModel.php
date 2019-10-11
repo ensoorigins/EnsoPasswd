@@ -119,7 +119,7 @@ class EnsoLogsModel
 
 		$sql .= " ORDER BY inserted_timestamp DESC ";
 
-		if (!empty($advance) && !empty($startIndex)) {
+		if (!empty($advance) && (!empty($startIndex) || $startIndex === 0)) {
 
 			$sql .= " LIMIT :size OFFSET :start ";
 
@@ -142,6 +142,8 @@ class EnsoLogsModel
 					$query->bindValue($key, $value, PDO::PARAM_STR);
 				}
 			}
+
+			EnsoDebug::var_error_log($query);
 
 			$query->execute();
 

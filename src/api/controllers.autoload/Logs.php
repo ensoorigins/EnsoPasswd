@@ -52,9 +52,14 @@ class Logs
             $endTime = Input::validate($request->getParam('endTime'), Input::$STRING);
             $severity = Input::validate($request->getParam('severity'), Input::$STRING);
             $userSearch = Input::validate($request->getParam('userSearch'), Input::$STRING);
-            $startIndex = Input::validate($request->getParam('startIndex'), Input::$STRING);
-            $advance = Input::validate($request->getParam('advance'), Input::$STRING);
+            $startIndex = Input::validate($request->getParam('startIndex'), Input::$INT);
+            $advance = Input::validate($request->getParam('advance'), Input::$INT);
             $searchString = Input::validate($request->getParam('search'), Input::$STRING);
+
+            EnsoDebug::var_error_log([
+                $startIndex,
+                $advance
+            ]);
 
 
         /* 1. autenticação - validação do token */

@@ -45,7 +45,6 @@ class Credentials
                 $url = Input::validate($url, Input::$URL, 1);
 
             AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
-            EnsoDebug::var_error_log($belongsTo);
             if ($belongsTo != null)
                 if (EnsoRBACModel::checkUserHasAction($authusername, 'manageCredentials') === false || PermissionModel::hasPermissionToSeeFolder($authusername, $belongsTo) === false)
                 throw new RBACDeniedException();
@@ -58,11 +57,9 @@ class Credentials
                     "description" => $description,
                     "url" => $url,
                     "belongsToFolder" => $belongsTo,
-                    "createdById" => $authusername
+                    "createdById" => $authusername,
                 ]
             );
-
-            EnsoDebug::d("Added cred $newCred");
 
             EnsoLogsModel::addEnsoLog($authusername, "Added credential", EnsoLogsModel::$INFORMATIONAL, "Credencial");
 
@@ -95,7 +92,12 @@ class Credentials
 
             $id = Input::validate($request->getParam('id'), Input::$INT, 0, CredentialModel::class, 'idCredentials');
 
-            $belongsTo = Input::validate($request->getParam('belongsTo'), Input::$INT, 5/* , FolderModel::class, 'idFolders' */ );
+
+            $belongsTo = $request->getParam('belongsTo');
+            if($belongsTo !== null)
+                $belongsTo = Input::validate($belongsTo, Input::$INT, 5/* , FolderModel::class, 'idFolders' */ );
+            else
+                $belongsTo = CredentialModel::getWhere(['idCredentials' => $id])[0]['belongsToFolder'];
 
             $title = Input::validate($request->getParam('title'), Input::$STRICT_STRING, 2);
             if (CredentialModel::exists(

@@ -143,12 +143,18 @@ if (($user == "" || $password == "" || $email == "") ||
     
     /* Add first admin user */
 
-    require "../api/passwd.conf.php";
-    require "../api/controllers.autoload/models/UserModel.php";
-    require "../api/libs/ensorbac/include.php";
-    require "../api/libs/ensodb/include.php";
+    require __DIR__ . "/../api/passwd.conf.php";
+    require __DIR__ . "/../api/libs/ensorbac/include.php";
+    require __DIR__ . "/../api/libs/ensodb/include.php";
+    require __DIR__ . "/../api/controllers.autoload/models/UserModel.php";
 
-    UserModel::addUser($user, $email, 0, $password);
+
+    UserModel::insert([
+        "username" => $user, 
+        "email" => $email,
+        "ldap" => 0,
+        "password" => EnsoShared::hash($password)
+    ]);
     EnsoRBACModel::addRoleToUser($user, "NormalUser");
     EnsoRBACModel::addRoleToUser($user, "SysAdmin");
 

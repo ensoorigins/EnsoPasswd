@@ -16,8 +16,10 @@ class ExternalMessageModel extends Entity
         "inserted_timestamp",
     ];
 
-    public static function insert($attributes)
+    public static function insert($attributes, bool $transactional = false, $returnField = NULL)
     {
+        $attributes['externalKey'] = '';
+        
         $newId = parent::insert($attributes);
 
         $externalKey = EnsoShared::hash($newId);

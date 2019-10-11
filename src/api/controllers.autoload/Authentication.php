@@ -14,20 +14,19 @@ class Authentication
             $username = Input::validate($request->getParam("username"), Input::$STRING, 0, UserModel::class, 'username');
             $password = Input::validate($request->getParam("password"), Input::$STRING);
 
-        /* 4. executar operações */
+            /* 4. executar operações */
 
             AuthenticationModel::performCredentialCheck($username, $password);
 
             //Generate Session Key
             $auth_key = AuthenticationModel::generateNewSessionKeyForUser($username);
-            
+
             //Get Actions
             $actions = EnsoRBACModel::getAvailableUserActions($username);
 
             EnsoLogsModel::addEnsoLog($username, "Logged in.", EnsoLogsModel::$INFORMATIONAL, 'Authentication');
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, ["sessionkey" => $auth_key, "actions" => $actions, "username" => $username]);
-
         } catch (InputException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (PermissionDeniedException $e) {
@@ -50,10 +49,12 @@ class Authentication
             AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "1");
-
         } catch (PermissionDeniedException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "0");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "0");
         } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
     }

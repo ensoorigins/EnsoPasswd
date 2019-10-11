@@ -99,7 +99,7 @@ class Folders
 
             EnsoLogsModel::addEnsoLog($authusername, "Folder with id $idFolder was created successfully.", EnsoLogsModel::$INFORMATIONAL, "Folder");
 
-            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $idFolder);
         } catch (BadInputValidationException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
         } catch (PermissionDeniedException $e) {
@@ -188,11 +188,10 @@ class Folders
 
             for ($i = count($children) - 1; $i >= 0; $i--) {
                 CredentialModel::delete(['belongsToFolder' => $children[$i]['idFolders']]);
-
+                PermissionModel::delete(['folder' => $children[$i]['idFolders']]);
                 FolderModel::delete(['idFolders' => $children[$i]['idFolders']]);
             }
 
-            if ($infoFolder['parent'] === null)
                 PermissionModel::delete(['folder' => $id]);
 
             CredentialModel::delete(['belongsToFolder' => $id]);
@@ -203,6 +202,7 @@ class Folders
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, '');
         } catch (BadInputValidationException $e) {
+            EnsoDebug::var_error_log($e);
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
         } catch (PermissionDeniedException $e) {
             EnsoLogsModel::addEnsoLog($authusername, "Tried to get folder $id, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
@@ -213,6 +213,8 @@ class Folders
         } catch (AuthenticationException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+
             EnsoLogsModel::addEnsoLog($authusername, "Tried to add folder $id, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }
@@ -284,7 +286,11 @@ class Folders
 
         $id = $request->getParam('folderId');
         if (!empty($id))
+        try{
             $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
+        } catch(Exception $e){
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_FOUND, "");
+        }
         else
             $id = null; 
         
@@ -346,8 +352,6 @@ class Folders
         if ($id != null) {
             array_push($childFolders, FolderModel::getWhere(['idFolders' => $id])[0]);
         }
-
-        EnsoDebug::var_error_log($childFolders);
 
         $termos = explode(' ', trim($string));
 
@@ -417,10 +421,10 @@ class Folders
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
             $parent = null;
             $id = $request->getParam('folderId');
-            if ($id != null) {
+            // if ($id != null) {
                 $id = Input::validate($id, Input::$INT, 0, FolderModel::class, 'idFolders');
                 $parent = FolderModel::getWhere(['idFolders' => $id], ['parent'])[0]['parent'];
-            }
+            // }
 
             $name = Input::validate($request->getParam('name'), Input::$STRICT_STRING, 2);
 
@@ -428,8 +432,6 @@ class Folders
                 throw new BadInputValidationException(1);
 
             $permissions = $request->getParam('permissions');
-
-            EnsoDebug::var_error_log($permissions);
 
             if (count($permissions) > 0)
                 foreach ($permissions as $userId => $hasAdmin)
@@ -469,6 +471,7 @@ class Folders
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
         } catch (BadInputValidationException $e) {
+            EnsoDebug::var_error_log($e);
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
         } catch (PermissionDeniedException $e) {
             EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
@@ -479,6 +482,7 @@ class Folders
         } catch (AuthenticationException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
         } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
             EnsoLogsModel::addEnsoLog($authusername, "Tried to search folder, operation failed.", EnsoLogsModel::$ERROR, "Credencial");
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
         }

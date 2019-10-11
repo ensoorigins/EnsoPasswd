@@ -3,10 +3,10 @@
 /*
  * Errors
  * 
- * 1 - Destination user does not exist
- * 2 - Credential non-existent
- * 3 - Invalid timeToDie
- * 4 - Email 
+ * 6 - Destination user does not exist
+ * 7 - Credential non-existent
+ * 8 - Invalid timeToDie
+ * 9 - Email 
  * 
  */
 
@@ -26,11 +26,11 @@ class Messages
             $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
 
-            $receiver = Input::validate($request->getParam('receiver'), Input::$STRICT_STRING, 1, UserModel::class, 'username');
+            $receiver = Input::validate($request->getParam('receiver'), Input::$STRICT_STRING, 6, UserModel::class, 'username');
 
             $credential = $request->getParam('referencedCredential');
             if (!empty($credential))
-                $credential = Input::validate($credential, Input::$INT, 2, CredentialModel::class, 'idCredentials');
+                $credential = Input::validate($credential, Input::$INT, 7, CredentialModel::class, 'idCredentials');
 
             $message = $request->getParam('message');
             if (!empty($message))
@@ -45,7 +45,7 @@ class Messages
                     break;
 
                 default:
-                    throw new BadInputValidationException(3);
+                    throw new BadInputValidationException(8);
             }
 
         /* 1. autenticação - validação do token */
@@ -75,7 +75,8 @@ class Messages
                 "timeToDie" => strtotime($timeToDie),
                 "referencedCredential" => $credential,
                 "senderId" => $authusername,
-                "receiverId" => $receiver
+                "receiverId" => $receiver,
+                "inserted_timestamp" => EnsoShared::now()   
             ]);
 
             global $ensoMailConfig;
@@ -396,19 +397,17 @@ class Messages
 
             $receiver = $request->getParam('receiver');
             if (!empty($receiver))
-                $receiver = Input::validate($receiver, Input::$EMAIL, 4);
+                $receiver = Input::validate($receiver, Input::$EMAIL, 9);
 
             $credential = $request->getParam('referencedCredential');
             if ($credential !== null)
-                $credential = Input::validate($credential, Input::$INT, 2, CredentialModel::class, 'idCredentials');
+                $credential = Input::validate($credential, Input::$INT, 7, CredentialModel::class, 'idCredentials');
 
             $message = $request->getParam('message');
             if (!empty($message))
                 $message = Input::validate($message, Input::$STRING);
 
             $timeToDie = $request->getParam('timeToDie');
-
-            EnsoDebug::var_error_log($timeToDie);
 
             switch ($timeToDie) {
                 case "+6 hours":
@@ -417,8 +416,7 @@ class Messages
                 case "+7 days":
                     break;
                 default:
-                    EnsoDebug::d("exited");
-                    throw new BadInputValidationException("bad timetodie", 3);
+                    throw new BadInputValidationException("bad timetodie", 8);
             }
 
             $destination = $request->getParam('destination');
@@ -451,7 +449,8 @@ class Messages
                 "message" => $message,
                 "timeToDie" => strtotime($timeToDie),
                 "referencedCredential" => $credential,
-                "senderId" => $authusername
+                "senderId" => $authusername,
+                "inserted_timestamp" => EnsoShared::now()   
             ]);
 
             EnsoLogsModel::addEnsoLog($authusername, "Shared external credential $credential", EnsoLogsModel::$INFORMATIONAL, "Messages");
@@ -499,8 +498,6 @@ class Messages
         /* 4. executar operações */
 
             $count = count(MessageModel::getWhere(['receiverId' => $authusername]));
-
-            EnsoDebug::d($count);
 
         /* 5. response */
 

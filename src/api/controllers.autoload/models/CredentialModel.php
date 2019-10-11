@@ -12,7 +12,7 @@ class CredentialModel extends Entity
         "description",
         "url",
         "belongsToFolder",
-        "createdById"
+        "createdById",
     ];
 
     public static function getEncryptionKey()
@@ -26,13 +26,13 @@ class CredentialModel extends Entity
         return $key;
     }
 
-    public static function insert($attributes)
+    public static function insert($attributes, bool $transactional = false, $returnField = NULL)
     {
         if (array_key_exists("password", $attributes)) {
             $attributes['password'] = EnsoShared::encrypt(EnsoShared::networkDecode($attributes['password']), static::getEncryptionKey());
         }
 
-        return parent::insert($attributes);
+        return parent::insert($attributes, $transactional, $returnField, $returnField);
     }
 
     public static function getWhere($filters, $attributes = null, $range = null)
@@ -41,12 +41,12 @@ class CredentialModel extends Entity
 
         if ($attributes === null || array_key_exists("password", $attributes))
             foreach ($result as &$cred)
-                $cred['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($cred['password'], static::getEncryptionKey()));
+            $cred['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($cred['password'], static::getEncryptionKey()));
 
         return $result;
     }
 
-    public static function editWhere($filters, $newAttributes)
+    public static function editWhere($filters, $newAttributes, $transactional = false)
     {
         if (array_key_exists("password", $newAttributes)) {
             $newAttributes['password'] = EnsoShared::encrypt(EnsoShared::networkDecode($newAttributes['password']), static::getEncryptionKey());
@@ -57,7 +57,7 @@ class CredentialModel extends Entity
 
     public static function getMatchesBelongingTo($belongsTo, $termos = ['%'])
     {
-        $sql = "SELECT idCredentials, title, createdById, username FROM " . static::$table . " " .
+        $sql = "SELECT idCredentials, title, createdById, username, description, url, password FROM " . static::$table . " " .
             "WHERE belongsToFolder = :belongsToFolder AND (";
 
         $values = array();
@@ -77,6 +77,11 @@ class CredentialModel extends Entity
         $db->prepare($sql);
         $db->execute($values);
 
-        return $db->fetchAll();
+        $rows = $db->fetchAll();
+
+        foreach ($rows as &$cred)
+            $cred['password'] = EnsoShared::networkEncode(EnsoShared::decrypt($cred['password'], static::getEncryptionKey()));
+
+        return $rows;
     }
 }

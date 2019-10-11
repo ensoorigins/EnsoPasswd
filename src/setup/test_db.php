@@ -15,6 +15,7 @@ function test_db()
         );
     } catch (PDOException $e) {
         http_response_code(406);
+        error_log($e->getMessage());
         echo "The connection to the database was not successful";
         return FALSE;
     }
