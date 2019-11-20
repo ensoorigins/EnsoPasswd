@@ -221,6 +221,8 @@ class Messages
             if ($message['senderId'] !== $authusername && $message['receiverId'] !== $authusername)
                 throw new PermissionDeniedException();
 
+            $message['password'] = EnsoShared::networkDecode($message['password']);
+
             EnsoLogsModel::addEnsoLog($authusername, "Consulted message $messageId", EnsoLogsModel::$INFORMATIONAL, "Messages");
 
         /* 5. response */
