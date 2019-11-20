@@ -113,8 +113,8 @@ class Users
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
             $username = Input::validate($request->getParam('username'), Input::$STRING, 0, UserModel::class, 'username');
             $email = Input::validate($request->getParam("email"), Input::$EMAIL, 1);
-            $ldap = (int)Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
-            $sysadmin = (int)Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
+            $ldap = (int) Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
+            $sysadmin = (int) Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
 
             $password = $request->getParam("password");
 
@@ -149,21 +149,24 @@ class Users
                 $newAttrs
             );
 
-            if ($request->getParam("sysadmin") !== null) { //Why can't I trust input to not recognize null as null and not false
-                if ($sysadmin && !in_array("SysAdmin", $roles)) { //é para marcar como sysadmin e ainda não está
-                    $return = EnsoRBACModel::addRoleToUser($username, "SysAdmin", time());
+            if (EnsoRBACModel::checkUserHasAction($authusername, 'manageUsers')) {
+                //if user can manage users then is allowed to change the role
+                if ($request->getParam("sysadmin") !== null) { //Why can't I trust input to not recognize null as null and not false
+                    if ($sysadmin && !in_array("SysAdmin", $roles)) { //é para marcar como sysadmin e ainda não está
+                        $return = EnsoRBACModel::addRoleToUser($username, "SysAdmin", time());
 
-                    if (!$return) {
-                        EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
-                        return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar role");
-                    }
-                } else
+                        if (!$return) {
+                            EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
+                            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel adicionar role");
+                        }
+                    } else
                 if (!$sysadmin && in_array("SysAdmin", $roles)) {
-                    $return = EnsoRBACModel::removeRoleFromUser($username, "SysAdmin");
+                        $return = EnsoRBACModel::removeRoleFromUser($username, "SysAdmin");
 
-                    if (!$return) {
-                        EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
-                        return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover role");
+                        if (!$return) {
+                            EnsoLogsModel::addEnsoLog($authusername, "Tried to edit user '$username', operation failed because the role could not be changed.", EnsoLogsModel::$ERROR, 'User');
+                            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "Impossivel remover role");
+                        }
                     }
                 }
             }
@@ -196,8 +199,8 @@ class Users
             $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
             $username = Input::validate($request->getParam('username'), Input::$STRICT_STRING, 4);
             $email = Input::validate($request->getParam("email"), Input::$EMAIL, 1);
-            $ldap = (int)Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
-            $sysadmin = (int)Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
+            $ldap = (int) Input::validate($request->getParam("ldap"), Input::$BOOLEAN, 2);
+            $sysadmin = (int) Input::validate($request->getParam("sysadmin"), Input::$BOOLEAN, 3);
             $password = Input::validate($request->getParam("password"), Input::$STRICT_STRING, 6);
 
             /* 1. autenticação - validação do token */
