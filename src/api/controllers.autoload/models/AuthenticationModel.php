@@ -100,6 +100,11 @@ class AuthenticationModel
         ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ds, LDAP_OPT_REFERRALS, 0);
         ldap_set_option($ds, LDAP_OPT_NETWORK_TIMEOUT, $ldapConfig['timeout']);
+
+        if (!ldap_bind($ds, $ldapConfig['username'], $ldapConfig['password'])) {
+            ldap_unbind($ds);
+            throw new AuthenticationException($username);
+        }
         
         /* search user */
 
