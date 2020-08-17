@@ -6,12 +6,12 @@ class PermissionDeniedException extends Exception
     public function __construct($who, $message, Exception $previous = null)
     {
         // make sure everything is assigned properly
-        parent::__construct("WHO: $who \nMessage: $message", $code, $previous);
+        parent::__construct("WHO: $who \nMessage: $message", 0, $previous);
     }
 
     // custom string representation of object
     public function __toString()
     {
-        return __class__ . $this->message . "\n";
+        return self::class . $this->message . "\n";
     }
 }
