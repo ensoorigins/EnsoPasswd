@@ -20,12 +20,13 @@ class EnsoDB
 			static::$dbConn = new PDO(
 				$databaseConfig['database_type'] . ':host=' . $databaseConfig['server'] . ';port=' . $databaseConfig['port'] . ';dbname=' . $databaseConfig['database_name'],
 				$databaseConfig['username'],
-				$databaseConfig['password']
+				$databaseConfig['password'],
+				array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
 			);
 
 			static::$dbConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-			if($transactionMode)
+			if ($transactionMode)
 				static::$dbConn->beginTransaction();
 		}
 	}
