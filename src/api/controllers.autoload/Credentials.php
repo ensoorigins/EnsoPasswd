@@ -47,7 +47,7 @@ class Credentials
             AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
             if ($belongsTo != null)
                 if (EnsoRBACModel::checkUserHasAction($authusername, 'manageCredentials') === false || PermissionModel::hasPermissionToSeeFolder($authusername, $belongsTo) === false)
-                throw new RBACDeniedException();
+                    throw new RBACDeniedException();
 
             $newCred = CredentialModel::insert(
                 [
@@ -64,7 +64,6 @@ class Credentials
             EnsoLogsModel::addEnsoLog($authusername, "Added credential", EnsoLogsModel::$INFORMATIONAL, "Credencial");
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, $newCred);
-
         } catch (BadInputValidationException $e) {
             EnsoDebug::var_error_log($e);
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
@@ -84,6 +83,57 @@ class Credentials
         }
     }
 
+    public static function moveCredential($request, $response, $args)
+    {
+        try {
+            $key = Input::validate($request->getParam('sessionkey'), Input::$STRING);
+            $authusername = Input::validate($request->getParam('authusername'), Input::$STRING);
+
+            $id = Input::validate($request->getParam('id'), Input::$INT, 0, CredentialModel::class, 'idCredentials');
+            $newParent = Input::validate($request->getParam('newParent'), Input::$INT, 0, FolderModel::class, 'idFolders');
+
+            $cred = CredentialModel::getWhere(['idCredentials' => $id], ['title']);
+
+            if (CredentialModel::exists(
+                [
+                    'title' => $cred[0]['title'],
+                    'belongsToFolder' => $newParent,
+                ]
+            ))
+                throw new BadInputValidationException(3);
+
+            AuthenticationModel::checkIfSessionKeyIsValid($key, $authusername);
+
+            if (!EnsoRBACModel::checkUserHasAction($authusername, 'manageCredentials'))
+                throw new RBACDeniedException();
+
+            PermissionModel::hasPermissionToSeeFolder($authusername, $newParent);
+
+            CredentialModel::editWhere(
+                ['idCredentials' => $id],
+                [
+                    'belongsToFolder' => $newParent
+                ]
+            );
+
+            EnsoLogsModel::addEnsoLog($authusername, "Moved credential $id to $newParent.", EnsoLogsModel::$INFORMATIONAL, "Credencial");
+
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
+        } catch (BadInputValidationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
+        } catch (RBACDeniedException $e) {
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to move credential $id , operation failed due to lack of permissions.", EnsoLogsModel::$NOTICE, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_FORBIDDEN, "");
+        } catch (AuthenticationException $e) {
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_AUTHORIZED, "");
+        } catch (Exception $e) {
+            EnsoDebug::var_error_log($e);
+            EnsoLogsModel::addEnsoLog($authusername, "Tried to move credential to $newParent , operation failed.", EnsoLogsModel::$ERROR, "Credencial");
+            return ensoSendResponse($response, EnsoShared::$ENSO_REST_INTERNAL_SERVER_ERROR, "");
+        }
+    }
+
+
     public static function editCredential($request, $response, $args)
     {
         try {
@@ -94,8 +144,8 @@ class Credentials
 
 
             $belongsTo = $request->getParam('belongsTo');
-            if($belongsTo !== null)
-                $belongsTo = Input::validate($belongsTo, Input::$INT, 5/* , FolderModel::class, 'idFolders' */ );
+            if ($belongsTo !== null)
+                $belongsTo = Input::validate($belongsTo, Input::$INT, 5/* , FolderModel::class, 'idFolders' */);
             else
                 $belongsTo = CredentialModel::getWhere(['idCredentials' => $id])[0]['belongsToFolder'];
 
@@ -145,7 +195,6 @@ class Credentials
             EnsoLogsModel::addEnsoLog($authusername, "Edited credential $id.", EnsoLogsModel::$INFORMATIONAL, "Credencial");
 
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_OK, "");
-
         } catch (BadInputValidationException $e) {
             return ensoSendResponse($response, EnsoShared::$ENSO_REST_NOT_ACCEPTABLE, $e->getCode());
         } catch (RBACDeniedException $e) {
@@ -231,6 +280,7 @@ class Credentials
 }
 
 $app->post('/credential/', 'Credentials::addNewCredential');
+$app->post('/credential/move/', 'Credentials::moveCredential');
 $app->put('/credential/', 'Credentials::editCredential');
 $app->get('/credential/', 'Credentials::getCredentialById');
 $app->delete('/credential/', 'Credentials::removeCredential');
